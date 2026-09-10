@@ -11,7 +11,7 @@ var params = {
   origin: "*",
 };
 
-export function fetchImageUrl(fileName) {
+export async function fetchImageUrl(fileName) {
   var imageParams = {
     action: "query",
     titles: "File:" + fileName,
@@ -22,47 +22,46 @@ export function fetchImageUrl(fileName) {
   };
 
   var url = baseUrl + "?" + new URLSearchParams(imageParams).toString();
-  return fetch(url)
-    .then(function (res) {
-      return res.json();
-    })
-    .then(function (data) {
-      var pages = data.query.pages;
-      var page = Object.values(pages)[0];
-      return page.imageinfo[0].url;
-    });
+  try {
+    var res = await fetch(url);
+    var data = await res.json();
+    var pages = data.query.pages;
+    var page = Object.values(pages)[0];
+    return page.imageinfo[0].url;
+  } catch (error) {
+    return "./media/placeholder.svg";
+  }
 }
 
-export function extractBears(wikitext) {
+export async function extractBears(wikitext) {
     var rows = wikitext.split("{{Species table/row");
     var bears = [];
-    var imagePromises = [];
-    rows.forEach(function (row) {
-      var nameMatch = row.match(/\|name=\[\[(.*?)\]\]/);
+
+    for (const row of rows) {
+              var nameMatch = row.match(/\|name=\[\[(.*?)\]\]/);
       var binomialMatch = row.match(/\|binomial=(.*?)\n/);
-      var imageMatch = row.match(/\|image=(.*?)\n/);
+      var imageMatch = row.match(/\|image=(.*?)\n/) ?? "";
       var rangeMatch = row.match(/\|range=(.*?)(?=\||$|\n)/);
       
 
-      if (nameMatch && binomialMatch && imageMatch && rangeMatch) {
+      if (nameMatch && binomialMatch && rangeMatch) {
         console.log(nameMatch)
+
+        var fileName = imageMatch[1].trim().replace("File:", "");
+        var imageUrl = await fetchImageUrl(fileName);
         let bear = {
           name: nameMatch[1],
           binomial: binomialMatch[1],
-          image: "./media/placeholder.svg",
+          image: imageUrl,
           range: rangeMatch[1],
         };
+        console.log(bear)
         bears.push(bear);
-        var fileName = imageMatch[1].trim().replace("File:", "");
-        var imagePromise = fetchImageUrl(fileName).then(function (imageUrl) {
-        bear.image = imageUrl;
-        });
-        imagePromises.push(imagePromise)
       }
-    });
+    }
 
-    Promise.all(imagePromises).then(function(){
-        var moreBears = document.querySelector(".more_bears");
+    console.log("Adding bears")
+            var moreBears = document.querySelector(".more_bears");
         bears.forEach((bear)=>{
             var html =
               '<div class="bear">' +
@@ -82,17 +81,10 @@ export function extractBears(wikitext) {
               "</div>";
             moreBears.innerHTML += html;
         })
-            
-
-    })
 }
 
-export function loadBearData() {
-  fetch(baseUrl + "?" + new URLSearchParams(params).toString())
-    .then(function (res) {
-      return res.json();
-    })
-    .then(function (data) {
-      extractBears(data.parse.wikitext["*"]);
-    });
+export async function loadBearData() {
+    var res = await fetch(baseUrl + "?" + new URLSearchParams(params).toString());
+    var data = await res.json();
+    await extractBears(data.parse.wikitext["*"]);
 }

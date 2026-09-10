@@ -42,8 +42,9 @@ export function extractBears(wikitext) {
       var nameMatch = row.match(/\|name=\[\[(.*?)\]\]/);
       var binomialMatch = row.match(/\|binomial=(.*?)\n/);
       var imageMatch = row.match(/\|image=(.*?)\n/);
+      var rangeMatch = row.match(/\|range=(.*?)(?=\||$|\n)/)
 
-      if (nameMatch && binomialMatch && imageMatch) {
+      if (nameMatch && binomialMatch && imageMatch && rangeMatch) {
         var fileName = imageMatch[1].trim().replace("File:", "");
 
         fetchImageUrl(fileName).then(function (imageUrl) {
@@ -51,7 +52,7 @@ export function extractBears(wikitext) {
             name: nameMatch[1],
             binomial: binomialMatch[1],
             image: imageUrl,
-            range: "TODO extract correct range",
+            range: rangeMatch[1],
           };
           bears.push(bear);
 
@@ -84,7 +85,7 @@ export function extractBears(wikitext) {
 }
 
 export function loadBearData() {
-  fetch(BASE_URL + "?" + new URLSearchParams(params).toString())
+  fetch(baseUrl + "?" + new URLSearchParams(params).toString())
     .then(function (res) {
       return res.json();
     })

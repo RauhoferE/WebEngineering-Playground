@@ -6,7 +6,7 @@ export function clearHighlights() {
   });
 }
 
-export function highlightText() {
+export function highlightText(searchKey) {
   clearHighlights();
   var query = searchKey.trim();
   if (!query) return;
@@ -38,7 +38,11 @@ export function highlightText() {
     }
   }
 
-  walk(document.body);
+  var articles = document.querySelectorAll("article");
+  articles.forEach(function (article) {
+    walk(article);
+  });
+  
 }
 
 export function initSearch() {

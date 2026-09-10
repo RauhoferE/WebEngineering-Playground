@@ -7,7 +7,6 @@ export function initComments() {
   commentWrapper.style.display = "none";
 
   showHideBtn.onclick = function () {
-    var showHideText = showHideBtn.textContent;
     if (commentHidden) {
       showHideBtn.textContent = "Hide comments";
       commentWrapper.style.display = "block";
@@ -27,13 +26,19 @@ export function initComments() {
   form.onsubmit = function (e) {
     e.preventDefault();
 
+        var nameValue = nameField.value;
+    var commentValue = commentField.value;
+
+    if (nameValue.length == 0 || commentValue.length == 0) {
+        return;
+    }
+
     var listItem = document.createElement("li");
     var namePara = document.createElement("p");
     var commentPara = document.createElement("p");
-    var nameValue = nameField.valeu;
-    var commentValue = commentField.value;
 
-    namePara.textContnet = nameValue;
+
+    namePara.textContent = nameValue;
     commentPara.textContent = commentValue;
 
     console.log(nameValue);

@@ -2,18 +2,20 @@ export function initComments() {
   // Show/hide comments toggle
   var showHideBtn = document.querySelector(".show-hide");
   var commentWrapper = document.querySelector(".comment-wrapper");
+  var commentHidden = true;
 
   commentWrapper.style.display = "none";
 
   showHideBtn.onclick = function () {
     var showHideText = showHideBtn.textContent;
-    if (showHideText === "Show comment") {
+    if (commentHidden) {
       showHideBtn.textContent = "Hide comments";
       commentWrapper.style.display = "block";
     } else {
       showHideBtn.textContent = "Show comments";
       commentWrapper.style.display = "none";
     }
+    commentHidden = !commentHidden;
   };
 
   // Comment form stuff

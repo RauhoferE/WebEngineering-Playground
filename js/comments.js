@@ -30,6 +30,7 @@ export function initComments() {
     var commentValue = commentField.value;
 
     if (nameValue.length == 0 || commentValue.length == 0) {
+      window.alert("Error: Name and Comment can't be empty")
         return;
     }
 

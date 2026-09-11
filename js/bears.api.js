@@ -1,17 +1,7 @@
 // Fetching bear data
 var baseUrl = "https://en.wikipedia.org/w/api.php";
-var title = "List_of_ursids";
 
-var params = {
-  action: "parse",
-  page: title,
-  prop: "wikitext",
-  section: 3,
-  format: "json",
-  origin: "*",
-};
-
-export async function fetchImageUrl(fileName) {
+async function fetchImageUrl(fileName) {
   var imageParams = {
     action: "query",
     titles: "File:" + fileName,
@@ -33,7 +23,7 @@ export async function fetchImageUrl(fileName) {
   }
 }
 
-export async function extractBears(wikitext) {
+async function extractBears(wikitext) {
     var rows = wikitext.split("{{Species table/row");
     var bears = [];
 
@@ -84,7 +74,20 @@ export async function extractBears(wikitext) {
 }
 
 export async function loadBearData() {
-    var res = await fetch(baseUrl + "?" + new URLSearchParams(params).toString());
+  var params = {
+  action: "parse",
+  page: "List_of_ursids",
+  prop: "wikitext",
+  section: 3,
+  format: "json",
+  origin: "*",
+};
+  try {
+        var res = await fetch(baseUrl + "?" + new URLSearchParams(params).toString());
     var data = await res.json();
     await extractBears(data.parse.wikitext["*"]);
+  } catch (error) {
+    window.alert("Error: Bears could not be fetched");
+  }
+
 }

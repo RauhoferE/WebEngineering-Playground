@@ -1,15 +1,17 @@
-export function clearHighlights() {
-  document.querySelectorAll(".highlight").forEach(function (el) {
+function clearHighlights() {
+  document.querySelectorAll(".highlight").forEach(el => {
     var parent = el.parentNode;
     parent.replaceChild(document.createTextNode(el.textContent), el);
     parent.normalize();
   });
 }
 
-export function highlightText(searchKey) {
+
+function highlightText(searchKey) {
   clearHighlights();
   var query = searchKey.trim();
-  if (!query) return;
+  // If nothing is input then the user clearly wants to clear the hightlights
+  if (!query)return;
 
   var regex = new RegExp(
     "(" + query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + ")",
@@ -39,8 +41,8 @@ export function highlightText(searchKey) {
   }
 
   var articles = document.querySelectorAll("article");
-  articles.forEach(function (article) {
-    walk(article);
+  articles.forEach(article =>{
+    walk(article)
   });
   
 }

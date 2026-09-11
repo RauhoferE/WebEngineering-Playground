@@ -94,6 +94,18 @@ Find and eliminate the remaining bad coding practices. Consider scope, accidenta
 // Uses display instead of toggling css classes
 ```
 
+```
+//search.js
+// var instead of let/const used
+// node.replaceWith.apply(node, span.childNodes) used instead of replaceWith -> apply is not needed
+// nested if statements
+    if (node.nodeType === 3 && node.nodeValue.match(regex)) {
+      // Text node
+      let match = node.nodeValue.match(regex);
+      if (match) {}}
+// Regex based html injection -> can lead to XSS vulnerabilities
+```
+
 
 ## 2. Dependency- and Build Management Playground
 Build the application with ``npm`` and a build and a dependency management tool of your choice (e.g. [Vite](https://vitejs.dev/), [Webpack](https://webpack.js.org/), or others). 

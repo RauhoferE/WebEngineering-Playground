@@ -13,10 +13,10 @@ async function fetchImageUrl(fileName) {
 
   const url = baseUrl + "?" + new URLSearchParams(imageParams).toString();
   try {
-    let res = await fetch(url);
-    let data = await res.json();
-    let pages = data.query.pages;
-    let page = Object.values(pages)[0];
+    const res = await fetch(url);
+    const data = await res.json();
+    const pages = data.query.pages;
+    const page = Object.values(pages)[0];
     return page.imageinfo[0].url;
   } catch (error) {
     // Return placeholder image just in case
@@ -25,7 +25,7 @@ async function fetchImageUrl(fileName) {
 }
 
 async function extractBears(wikitext) {
-    let rows = wikitext.split("{{Species table/row");
+    const rows = wikitext.split("{{Species table/row");
 
   const parsedRows = rows
     .map((row) => {
@@ -58,7 +58,7 @@ async function extractBears(wikitext) {
 }
 
 async function createBearElements(bears) {
-  let moreBears = document.querySelector(".more_bears");
+  const moreBears = document.querySelector(".more_bears");
   const fragment = document.createDocumentFragment();
   bears.forEach((bear) => {
     const bearDiv = document.createElement("div");
@@ -85,7 +85,7 @@ async function createBearElements(bears) {
 }
 
 export async function loadBearData() {
-  var params = {
+  const params = {
   action: "parse",
   page: "List_of_ursids",
   prop: "wikitext",
@@ -94,9 +94,9 @@ export async function loadBearData() {
   origin: "*",
 };
   try {
-        let res = await fetch(baseUrl + "?" + new URLSearchParams(params).toString());
-    let data = await res.json();
-    let parsedBears = await extractBears(data.parse.wikitext["*"]);
+        const res = await fetch(baseUrl + "?" + new URLSearchParams(params).toString());
+    const data = await res.json();
+    const parsedBears = await extractBears(data.parse.wikitext["*"]);
     console.log(parsedBears);
     await createBearElements(parsedBears);
   } catch (error) {

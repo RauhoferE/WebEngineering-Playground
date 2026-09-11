@@ -1,6 +1,6 @@
 function clearHighlights() {
   document.querySelectorAll(".highlight").forEach(el => {
-    let parent = el.parentNode;
+    const parent = el.parentNode;
     parent.replaceChild(document.createTextNode(el.textContent), el);
     parent.normalize();
   });
@@ -8,7 +8,7 @@ function clearHighlights() {
 
 
 function highlightText(searchKey) {
-  let query = searchKey.trim();
+  const query = searchKey.trim();
   // If nothing is input then the user clearly wants to clear the hightlights
   if (!query)return;
 
@@ -18,7 +18,7 @@ function highlightText(searchKey) {
   function walk(node) {
     if (node.nodeType === 3 && node.nodeValue.match(regex)) {
       // Text node
-      let span = document.createElement("span");
+      const span = document.createElement("span");
       const parts = node.nodeValue.split(regex);
       parts.forEach((part) => {
         if (part.toLowerCase() === query.toLowerCase()) {
@@ -52,7 +52,7 @@ function highlightText(searchKey) {
 }
 
 export function initSearch() {
-  let searchForm = document.querySelector(".search");
+  const searchForm = document.querySelector(".search");
   if (!searchForm) return;
 
   searchForm.addEventListener("submit", function (e) {

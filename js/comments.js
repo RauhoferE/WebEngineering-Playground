@@ -1,7 +1,7 @@
 export function initComments() {
   // Show/hide comments toggle
-  let showHideBtn = document.querySelector(".show-hide");
-  let commentWrapper = document.querySelector(".comment-wrapper");
+  const showHideBtn = document.querySelector(".show-hide");
+  const commentWrapper = document.querySelector(".comment-wrapper");
 
   if(!showHideBtn || !commentWrapper) return;
 
@@ -21,10 +21,10 @@ export function initComments() {
   });
 
   // Comment form stuff
-  let form = document.querySelector(".comment-form");
-  let nameField = document.querySelector("#name");
-  let commentField = document.querySelector("#comment");
-  let list = document.querySelector(".comment-container");
+  const form = document.querySelector(".comment-form");
+  const nameField = document.querySelector("#name");
+  const commentField = document.querySelector("#comment");
+  const list = document.querySelector(".comment-container");
 
   if(!form || !nameField || !commentField || !list) return;
 
@@ -32,17 +32,17 @@ export function initComments() {
     e.preventDefault();
     if(!nameField || !commentField || !list) return;
 
-        let nameValue = nameField.value;
-    let commentValue = commentField.value;
+        const nameValue = nameField.value;
+    const commentValue = commentField.value;
 
     if (nameValue.trim().length === 0 || commentValue.trim().length === 0) {
       window.alert("Error: Name and Comment can't be empty")
         return;
     }
 
-    let listItem = document.createElement("li");
-    let namePara = document.createElement("p");
-    let commentPara = document.createElement("p");
+    const listItem = document.createElement("li");
+    const namePara = document.createElement("p");
+    const commentPara = document.createElement("p");
 
 
     namePara.textContent = nameValue;

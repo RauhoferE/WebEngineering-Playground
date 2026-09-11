@@ -83,6 +83,17 @@ Find and eliminate the remaining bad coding practices. Consider scope, accidenta
 > console.log('Make use of markdown codesnippets to show and explain good/bad practices!')
 > ```
 
+```
+// comment.js
+// var instead of let/const used
+// String instead of commentWrapper.style.display used -> redundant and can desync
+// onclick used instead of addEventListener -> not reusable and can be overwritten
+// == instead of === used -> type coercion can lead to unexpected behavior (returns true only if both operands are equal after type conversion)
+// console.log left in code
+// Element lookups have no existence check -> can lead to runtime errors if element is not found (showHideButton, commentWrapper)
+// Uses display instead of toggling css classes
+```
+
 
 ## 2. Dependency- and Build Management Playground
 Build the application with ``npm`` and a build and a dependency management tool of your choice (e.g. [Vite](https://vitejs.dev/), [Webpack](https://webpack.js.org/), or others). 

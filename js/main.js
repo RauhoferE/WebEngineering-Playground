@@ -2,7 +2,7 @@ import { initSearch } from './search.js';
 import { initComments } from './comments.js';
 import { loadBearData } from './bears.api.js';
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', function() {
   initSearch();
   initComments();
   loadBearData();

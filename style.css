@@ -248,3 +248,11 @@ audio {
 .comment-container li p:nth-child(2) {
   flex: 5;
 }
+
+div[class="comment-wrapper hidden"] {
+  display: none;
+}
+
+div[class="comment-wrapper visible"] {
+  display: block;
+}

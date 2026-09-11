@@ -1,13 +1,25 @@
+let lastQuery = "";
+const observer = new MutationObserver(() => {
+  if (lastQuery) {
+    clearHighlights();
+    highlightText(lastQuery);
+  }
+});
+
 function clearHighlights() {
+  observer.disconnect();
   document.querySelectorAll(".highlight").forEach(el => {
     const parent = el.parentNode;
     parent.replaceChild(document.createTextNode(el.textContent), el);
     parent.normalize();
   });
+  startObserver();
 }
 
-
 function highlightText(searchKey) {
+  // Stop observer to prevent infinite loop when we modify the DOM
+  observer.disconnect();
+  lastQuery = searchKey.trim();
   const query = searchKey.trim();
   // If nothing is input then the user clearly wants to clear the hightlights
   if (!query)return;
@@ -49,6 +61,13 @@ function highlightText(searchKey) {
     walk(article)
   });
 
+  startObserver(); // Restart observer after highlighting
+}
+
+function startObserver() {
+  document.querySelectorAll("article").forEach((article) => {
+    observer.observe(article, { childList: true, subtree: true });
+  });
 }
 
 export function initSearch() {
@@ -60,4 +79,5 @@ export function initSearch() {
     clearHighlights();
     highlightText(this.q.value);
   });
+  startObserver();
 }

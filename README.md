@@ -106,6 +106,18 @@ Find and eliminate the remaining bad coding practices. Consider scope, accidenta
 // Regex based html injection -> can lead to XSS vulnerabilities
 ```
 
+```
+//bears.api.js
+// var instead of let/const used
+// console.log left in code
+// Fixed inconsistent validation logic in imageMatch, nameMatch etc..
+// Usage of building html via string concatination and innerHTML -> can lead to XSS vulnerabilities
+// Adding div on each iteration instead of using document fragment -> can lead to performance issues
+// Fixed performance issues when fetching images by using Promise.all to fetch all images concurrently instead of sequentially 
+// This also preserves the order of the bears
+// Refactored extractBear class into two parts: extractBear and fetchBearImage to separate concerns and improve readability
+```
+
 
 ## 2. Dependency- and Build Management Playground
 Build the application with ``npm`` and a build and a dependency management tool of your choice (e.g. [Vite](https://vitejs.dev/), [Webpack](https://webpack.js.org/), or others). 

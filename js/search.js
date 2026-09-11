@@ -21,13 +21,15 @@ function highlightText(searchKey) {
       let span = document.createElement("span");
       const parts = node.nodeValue.split(regex);
       parts.forEach((part) => {
-          if (part.toLowerCase() === query.toLowerCase()) {
+        if (part.toLowerCase() === query.toLowerCase()) {
+            // Replace found query with a <mark> element
             const mark = document.createElement("mark");
             mark.className = "highlight";
             mark.textContent = part;
             span.appendChild(mark);
-          } else if (part.length > 0) {
-            span.appendChild(document.createTextNode(part));
+        } else if (part.length > 0) {
+          // Replace remaining text with a text node
+          span.appendChild(document.createTextNode(part));
           }
         });
       node.replaceWith(span);

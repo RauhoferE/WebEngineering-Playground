@@ -130,3 +130,22 @@ Type mismatches, missing interfaces, incorrect argument counts, null/undefined e
 const form = document.querySelector(".comment-form");
 const form = document.querySelector<HTMLFormElement>(".comment-form");
 ```
+## Task 4
+
+**Theory question:** Why are stable, composable commands such as these useful as an interface for developers and CI? Explain idempotence and identify which of your scripts should be idempotent.
+
+They decouple project specific commands from the implementation details like a make file.
+
+It allows for developers and CI to run identical workflows accross repositories.
+
+Its also easier to swap out toolchains while the commands stay the same.
+
+Non Zero exit code also allow the CI to fail early and block broken code from merging.
+
+**Idempotent** -> Something that runs the exact same way every time.
+For the same input you get the same output.
+
+build -> Given the same source code builds the same app on every machine
+lint/format -> Inspection which is read only
+
+dev->Is not idempotent since it spawns a second server or cant run on the same port

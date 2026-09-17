@@ -10,13 +10,16 @@ function clearHighlights() {
   observer.disconnect();
   document.querySelectorAll(".highlight").forEach(el => {
     const parent = el.parentNode;
-    parent.replaceChild(document.createTextNode(el.textContent), el);
-    parent.normalize();
+    if (parent != null) {
+      parent.replaceChild(document.createTextNode(el.textContent), el);
+      parent.normalize();
+    }
+
   });
   startObserver();
 }
 
-function highlightText(searchKey) {
+function highlightText(searchKey: string) {
   // Stop observer to prevent infinite loop when we modify the DOM
   observer.disconnect();
   lastQuery = searchKey.trim();
@@ -27,8 +30,8 @@ function highlightText(searchKey) {
   const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const regex = new RegExp(`(${escapedQuery})`, "gi");
 
-  function walk(node) {
-    if (node.nodeType === 3 && node.nodeValue.match(regex)) {
+  function walk(node : ChildNode) {
+    if (node.nodeType === 3 && node.nodeValue && node.nodeValue.match(regex)) {
       // Text node
       const span = document.createElement("span");
       const parts = node.nodeValue.split(regex);
@@ -48,9 +51,9 @@ function highlightText(searchKey) {
 
     } else if (
       node.nodeType === 1 &&
-      node.tagName !== "SCRIPT" &&
-      node.tagName !== "STYLE" &&
-      node.tagName !== "FORM"
+      (node as Element).tagName !== "SCRIPT" &&
+      (node as Element).tagName !== "STYLE" &&
+      (node as Element).tagName !== "FORM"
     ) {
       node.childNodes.forEach(walk);
     }
@@ -74,10 +77,13 @@ export function initSearch() {
   const searchForm = document.querySelector(".search");
   if (!searchForm) return;
 
+  const queryInput = searchForm.querySelector<HTMLInputElement>('input[name="q"]');
+  if (!queryInput) return;
+
   searchForm.addEventListener("submit", function (e) {
     e.preventDefault();
     clearHighlights();
-    highlightText(this.q.value);
+    highlightText(queryInput.value);
   });
   startObserver();
 }

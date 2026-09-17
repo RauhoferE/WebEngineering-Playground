@@ -8,13 +8,12 @@ const observer = new MutationObserver(() => {
 
 function clearHighlights() {
   observer.disconnect();
-  document.querySelectorAll(".highlight").forEach(el => {
+  document.querySelectorAll(".highlight").forEach((el) => {
     const parent = el.parentNode;
     if (parent != null) {
       parent.replaceChild(document.createTextNode(el.textContent), el);
       parent.normalize();
     }
-
   });
   startObserver();
 }
@@ -25,30 +24,29 @@ function highlightText(searchKey: string) {
   lastQuery = searchKey.trim();
   const query = searchKey.trim();
   // If nothing is input then the user clearly wants to clear the hightlights
-  if (!query)return;
+  if (!query) return;
 
   const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const regex = new RegExp(`(${escapedQuery})`, "gi");
 
-  function walk(node : ChildNode) {
+  function walk(node: ChildNode) {
     if (node.nodeType === 3 && node.nodeValue && node.nodeValue.match(regex)) {
       // Text node
       const span = document.createElement("span");
       const parts = node.nodeValue.split(regex);
       parts.forEach((part) => {
         if (part.toLowerCase() === query.toLowerCase()) {
-            // Replace found query with a <mark> element
-            const mark = document.createElement("mark");
-            mark.className = "highlight";
-            mark.textContent = part;
-            span.appendChild(mark);
+          // Replace found query with a <mark> element
+          const mark = document.createElement("mark");
+          mark.className = "highlight";
+          mark.textContent = part;
+          span.appendChild(mark);
         } else if (part.length > 0) {
           // Replace remaining text with a text node
           span.appendChild(document.createTextNode(part));
-          }
-        });
+        }
+      });
       node.replaceWith(span);
-
     } else if (
       node.nodeType === 1 &&
       (node as Element).tagName !== "SCRIPT" &&
@@ -60,8 +58,8 @@ function highlightText(searchKey: string) {
   }
 
   const articles = document.querySelectorAll<HTMLElement>("article");
-  articles.forEach(article =>{
-    walk(article)
+  articles.forEach((article) => {
+    walk(article);
   });
 
   startObserver(); // Restart observer after highlighting
@@ -77,7 +75,8 @@ export function initSearch() {
   const searchForm = document.querySelector<HTMLElement>(".search");
   if (!searchForm) return;
 
-  const queryInput = searchForm.querySelector<HTMLInputElement>('input[name="q"]');
+  const queryInput =
+    searchForm.querySelector<HTMLInputElement>('input[name="q"]');
   if (!queryInput) return;
 
   searchForm.addEventListener("submit", function (e) {

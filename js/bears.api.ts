@@ -1,11 +1,11 @@
-import { Bear, ParsedBear } from "./types";
+import { type Bear, type ParsedBear } from "./types";
 import { isImageQueryResponse, isWikitextResponse } from "./validation";
 
 // Fetching bear data
 const baseUrl = "https://en.wikipedia.org/w/api.php";
 
-async function fetchImageUrl(fileName: string) : Promise<string> {
-  const imageParams : Record<string, string> = {
+async function fetchImageUrl(fileName: string): Promise<string> {
+  const imageParams: Record<string, string> = {
     action: "query",
     titles: "File:" + fileName,
     prop: "imageinfo",
@@ -17,7 +17,7 @@ async function fetchImageUrl(fileName: string) : Promise<string> {
   const url = baseUrl + "?" + new URLSearchParams(imageParams).toString();
   try {
     const res = await fetch(url);
-    const data : unknown = await res.json();
+    const data: unknown = await res.json();
     if (!isImageQueryResponse(data)) {
       return "/media/placeholder.svg";
     }
@@ -31,7 +31,7 @@ async function fetchImageUrl(fileName: string) : Promise<string> {
 }
 
 async function extractBears(wikitext: string) {
-    const rows = wikitext.split("{{Species table/row");
+  const rows = wikitext.split("{{Species table/row");
 
   const parsedRows = rows
     .map((row) => {
@@ -42,13 +42,13 @@ async function extractBears(wikitext: string) {
 
       if (!nameMatch || !binomialMatch || !rangeMatch) return null;
 
-      if (!nameMatch[1] || !binomialMatch[1] || !rangeMatch[1] ) {
+      if (!nameMatch[1] || !binomialMatch[1] || !rangeMatch[1]) {
         return null;
       }
 
-      let fileName : string | null = null
+      let fileName: string | null = null;
 
-      if (imageMatch && imageMatch[1]) {
+      if (imageMatch?.[1]) {
         fileName = imageMatch[1].trim().replace("File:", "");
       }
 
@@ -56,19 +56,21 @@ async function extractBears(wikitext: string) {
         name: nameMatch[1],
         binomial: binomialMatch[1],
         range: rangeMatch[1],
-        fileName: fileName,
+        fileName,
       } as ParsedBear;
     })
     .filter((row) => row !== null);
 
-  const bears: Bear[] = await Promise.all(parsedRows.map(async (row) => ({
-    name: row.name,
-    binomial: row.binomial,
-    range: row.range,
-    image: row.fileName
-      ? await fetchImageUrl(row.fileName)
-      : "/media/placeholder.svg",
-  })));
+  const bears: Bear[] = await Promise.all(
+    parsedRows.map(async (row) => ({
+      name: row.name,
+      binomial: row.binomial,
+      range: row.range,
+      image: row.fileName
+        ? await fetchImageUrl(row.fileName)
+        : "/media/placeholder.svg",
+    })),
+  );
 
   return bears;
 }
@@ -83,7 +85,7 @@ async function createBearElements(bears: Bear[]) {
   bears.forEach((bear) => {
     const bearDiv = document.createElement("div");
     bearDiv.className = "bear";
-    const img = document.createElement("img")
+    const img = document.createElement("img");
     img.src = bear.image;
     img.alt = `Image of ${bear.name}`;
     img.style.width = "200px";
@@ -100,24 +102,26 @@ async function createBearElements(bears: Bear[]) {
 
     bearDiv.append(img, namePara, rangePara);
     fragment.appendChild(bearDiv);
-        })
+  });
   moreBears.appendChild(fragment);
 }
 
 export async function loadBearData() {
   const params: Record<string, string> = {
-  action: "parse",
-  page: "List_of_ursids",
-  prop: "wikitext",
-  section: "3",
-  format: "json",
-  origin: "*",
-};
+    action: "parse",
+    page: "List_of_ursids",
+    prop: "wikitext",
+    section: "3",
+    format: "json",
+    origin: "*",
+  };
   try {
-        const res = await fetch(baseUrl + "?" + new URLSearchParams(params).toString());
-    const data : unknown = await res.json();
+    const res = await fetch(
+      baseUrl + "?" + new URLSearchParams(params).toString(),
+    );
+    const data: unknown = await res.json();
     if (!isWikitextResponse(data)) {
-        window.alert("Error: Bears could not be fetched");
+      window.alert("Error: Bears could not be fetched");
       return;
     }
     const parsedBears = await extractBears(data.parse.wikitext["*"]);
@@ -126,5 +130,4 @@ export async function loadBearData() {
   } catch (error) {
     window.alert("Error: Bears could not be fetched");
   }
-
 }

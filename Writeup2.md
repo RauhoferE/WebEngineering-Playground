@@ -88,3 +88,45 @@ Through the type erasure the js will assume that the properties exist.
 
 If wikipedia changes their markup or missing fields the code will proceed as if the properties of the type still exist.
 And when calling them it might crash the application.
+
+## Task 3
+
+**Theory question:** What different problems do a linter, a formatter, and the TypeScript compiler detect? Give one concrete example for each from this project.
+
+### Formatter(Prettier)
+
+Code presentation and Code style
+
+Indentation, quote types, trailing commas, whitespaces
+
+```
+const data : unknown = await res.json();
+const data: unknown = await res.json();
+```
+
+### Linter (EsLint)
+
+Code quality, Performs static analysis
+
+Unused variable, unreachable code, Loose equality, etc
+
+```
+   3:7   error  Unexpected string value in conditional. An explicit empty string check is required                 @typescript-eslint/strict-boolean-expressions
+const observer = new MutationObserver(() => {
+  if (lastQuery) {
+    clearHighlights();
+    highlightText(lastQuery);
+  }
+});
+```
+
+### Typescript compiler
+
+Type safety and syntax
+
+Type mismatches, missing interfaces, incorrect argument counts, null/undefined errors
+
+```
+const form = document.querySelector(".comment-form");
+const form = document.querySelector<HTMLFormElement>(".comment-form");
+```

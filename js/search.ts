@@ -59,7 +59,7 @@ function highlightText(searchKey: string) {
     }
   }
 
-  const articles = document.querySelectorAll("article");
+  const articles = document.querySelectorAll<HTMLElement>("article");
   articles.forEach(article =>{
     walk(article)
   });
@@ -74,7 +74,7 @@ function startObserver() {
 }
 
 export function initSearch() {
-  const searchForm = document.querySelector(".search");
+  const searchForm = document.querySelector<HTMLElement>(".search");
   if (!searchForm) return;
 
   const queryInput = searchForm.querySelector<HTMLInputElement>('input[name="q"]');

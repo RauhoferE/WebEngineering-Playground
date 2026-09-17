@@ -1,7 +1,7 @@
 export function initComments() {
   // Show/hide comments toggle
-  const showHideBtn = document.querySelector(".show-hide");
-  const commentWrapper = document.querySelector(".comment-wrapper");
+  const showHideBtn = document.querySelector<HTMLElement>(".show-hide");
+  const commentWrapper = document.querySelector<HTMLElement>(".comment-wrapper");
 
   if(!showHideBtn || !commentWrapper) return;
 
@@ -21,10 +21,10 @@ export function initComments() {
   });
 
   // Comment form stuff
-  const form = document.querySelector(".comment-form");
-  const nameField = document.querySelector("#name");
-  const commentField = document.querySelector("#comment");
-  const list = document.querySelector(".comment-container");
+  const form = document.querySelector<HTMLFormElement>(".comment-form");
+  const nameField = document.querySelector<HTMLInputElement>("#name");
+  const commentField = document.querySelector<HTMLInputElement>("#comment");
+  const list = document.querySelector<HTMLElement>(".comment-container");
 
   if(!form || !nameField || !commentField || !list) return;
 

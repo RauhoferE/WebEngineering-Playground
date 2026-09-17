@@ -20,7 +20,7 @@ async function fetchImageUrl(fileName) {
     return page.imageinfo[0].url;
   } catch (error) {
     // Return placeholder image just in case
-    return "./media/placeholder.svg";
+    return "/media/placeholder.svg";
   }
 }
 
@@ -51,7 +51,7 @@ async function extractBears(wikitext) {
     range: row.range,
     image: row.fileName
       ? await fetchImageUrl(row.fileName)
-      : "./media/placeholder.svg",
+      : "/media/placeholder.svg",
   })));
 
   return bears;

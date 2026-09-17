@@ -1,8 +1,11 @@
+import { Bear, ParsedBear } from "./types";
+import { isImageQueryResponse, isWikitextResponse } from "./validation";
+
 // Fetching bear data
 const baseUrl = "https://en.wikipedia.org/w/api.php";
 
-async function fetchImageUrl(fileName) {
-  const imageParams = {
+async function fetchImageUrl(fileName: string) : Promise<string> {
+  const imageParams : Record<string, string> = {
     action: "query",
     titles: "File:" + fileName,
     prop: "imageinfo",
@@ -14,17 +17,20 @@ async function fetchImageUrl(fileName) {
   const url = baseUrl + "?" + new URLSearchParams(imageParams).toString();
   try {
     const res = await fetch(url);
-    const data = await res.json();
+    const data : unknown = await res.json();
+    if (!isImageQueryResponse(data)) {
+      return "/media/placeholder.svg";
+    }
     const pages = data.query.pages;
     const page = Object.values(pages)[0];
-    return page.imageinfo[0].url;
+    return page?.imageinfo?.[0]?.url ?? "/media/placeholder.svg";
   } catch (error) {
     // Return placeholder image just in case
     return "/media/placeholder.svg";
   }
 }
 
-async function extractBears(wikitext) {
+async function extractBears(wikitext: string) {
     const rows = wikitext.split("{{Species table/row");
 
   const parsedRows = rows
@@ -36,16 +42,26 @@ async function extractBears(wikitext) {
 
       if (!nameMatch || !binomialMatch || !rangeMatch) return null;
 
+      if (!nameMatch[1] || !binomialMatch[1] || !rangeMatch[1] ) {
+        return null;
+      }
+
+      let fileName : string | null = null
+
+      if (imageMatch && imageMatch[1]) {
+        fileName = imageMatch[1].trim().replace("File:", "");
+      }
+
       return {
         name: nameMatch[1],
         binomial: binomialMatch[1],
         range: rangeMatch[1],
-        fileName: imageMatch ? imageMatch[1].trim().replace("File:", "") : null,
-      };
+        fileName: fileName,
+      } as ParsedBear;
     })
     .filter((row) => row !== null);
 
-  const bears = await Promise.all(parsedRows.map(async (row) => ({
+  const bears: Bear[] = await Promise.all(parsedRows.map(async (row) => ({
     name: row.name,
     binomial: row.binomial,
     range: row.range,
@@ -57,8 +73,12 @@ async function extractBears(wikitext) {
   return bears;
 }
 
-async function createBearElements(bears) {
+async function createBearElements(bears: Bear[]) {
   const moreBears = document.querySelector(".more_bears");
+  if (!moreBears) {
+    return;
+  }
+
   const fragment = document.createDocumentFragment();
   bears.forEach((bear) => {
     const bearDiv = document.createElement("div");
@@ -85,17 +105,21 @@ async function createBearElements(bears) {
 }
 
 export async function loadBearData() {
-  const params = {
+  const params: Record<string, string> = {
   action: "parse",
   page: "List_of_ursids",
   prop: "wikitext",
-  section: 3,
+  section: "3",
   format: "json",
   origin: "*",
 };
   try {
         const res = await fetch(baseUrl + "?" + new URLSearchParams(params).toString());
-    const data = await res.json();
+    const data : unknown = await res.json();
+    if (!isWikitextResponse(data)) {
+        window.alert("Error: Bears could not be fetched");
+      return;
+    }
     const parsedBears = await extractBears(data.parse.wikitext["*"]);
     console.log(parsedBears);
     await createBearElements(parsedBears);

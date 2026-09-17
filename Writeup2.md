@@ -66,3 +66,25 @@ Another install could result in a different version.
 
 package-lock.json contains the exact resolved versions of packages.
 Helps to keep installs identical
+
+## Task 2
+
+**Theory question:** TypeScript uses structural typing and erases types during compilation. Explain both concepts and why a compile-time type alone cannot guarantee the shape of a Wikipedia API response at runtime.
+
+### Answer
+
+Structural typing
+
+Typescript determines type compataibility based in an objects structure. (It does not have any explicit class inheritance or interface implementation)
+
+If an object has all required properties of a type it treats it as this type regardless on how it was created.
+
+Type erasure: During compilation typescript strips away type annotation, interface, custom type alias and generic constraints since the javascript file has no type information. It only exists when statically checking not during runtime.
+
+Why type fails from API:
+Type assertions just tells typescript that you now that the API response matches your type it is not a parser.
+
+Through the type erasure the js will assume that the properties exist.
+
+If wikipedia changes their markup or missing fields the code will proceed as if the properties of the type still exist.
+And when calling them it might crash the application.

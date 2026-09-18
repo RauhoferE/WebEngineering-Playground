@@ -11,7 +11,7 @@ The raw source file and what gets commited to git.
 - index.html
 - js folder
 - style.css
-- public folder 
+- public folder
 - package.json
 
 Not commited:
@@ -118,6 +118,8 @@ const observer = new MutationObserver(() => {
     highlightText(lastQuery);
   }
 });
+
+Missing return type
 ```
 
 ### Typescript compiler
@@ -130,6 +132,7 @@ Type mismatches, missing interfaces, incorrect argument counts, null/undefined e
 const form = document.querySelector(".comment-form");
 const form = document.querySelector<HTMLFormElement>(".comment-form");
 ```
+
 ## Task 4
 
 **Theory question:** Why are stable, composable commands such as these useful as an interface for developers and CI? Explain idempotence and identify which of your scripts should be idempotent.

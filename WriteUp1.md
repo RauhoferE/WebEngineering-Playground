@@ -6,7 +6,7 @@
 
 **Answer:** An ES module differs from a classic script by the following
 
-### Scope 
+### Scope
 
 Script -> Top level variables and functions are added directly to the global scope (window)
 Module -> Top level variables and functions are only accessible in the module except when they are exported or imported from other modules
@@ -104,7 +104,6 @@ Checks continuesly if Call stack is empty and orchestrates the execution:
 3. When empty, the browser renders UI updates
 4. Take next task from the macrotask queue and push onto the call stack.
 
-
 ### Arrow function vs Regular function
 
 They are not just shorter syntax for regular functions they have completly different behaviour(Execution context, binding and object creation)
@@ -122,7 +121,7 @@ In arrow functions this is resolved lexically from the enclosing scope.
 ```
 const user = {
   name: 'Alex',
-  
+
   // Regular Function
   greetRegular: function() {
     console.log(this.name); // 'Alex' (this -> user)
@@ -206,14 +205,14 @@ Data/API (network failures, IO failures)
 
 ### Why catching errors at the source is not always a good idea
 
-1. Context and trace loss 
-If low level function catches an error and returns the overlying function has no idea that a failure occured.
-This might lead to a crash further down the execution path -> Root cause analysis becomes difficult
+1. Context and trace loss
+   If low level function catches an error and returns the overlying function has no idea that a failure occured.
+   This might lead to a crash further down the execution path -> Root cause analysis becomes difficult
 
 2. Masking source of truth
-Strips original Error stack trace or prevents higher boundaries from acting accordingly
+   Strips original Error stack trace or prevents higher boundaries from acting accordingly
 
 3. Duplicate and noise logs
-When low level function catches and throws error, the same error might be printed multiple times at each layer of the stack.
+   When low level function catches and throws error, the same error might be printed multiple times at each layer of the stack.
 
 Best when low level utility functions propogate the error unless they can recover from it.

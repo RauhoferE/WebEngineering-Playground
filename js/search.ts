@@ -1,12 +1,12 @@
 let lastQuery = "";
 const observer = new MutationObserver(() => {
-  if (lastQuery) {
+  if (lastQuery !== "") {
     clearHighlights();
     highlightText(lastQuery);
   }
 });
 
-function clearHighlights() {
+function clearHighlights(): void {
   observer.disconnect();
   document.querySelectorAll(".highlight").forEach((el) => {
     const parent = el.parentNode;
@@ -18,23 +18,23 @@ function clearHighlights() {
   startObserver();
 }
 
-function highlightText(searchKey: string) {
+function highlightText(searchKey: string): void {
   // Stop observer to prevent infinite loop when we modify the DOM
   observer.disconnect();
   lastQuery = searchKey.trim();
   const query = searchKey.trim();
   // If nothing is input then the user clearly wants to clear the hightlights
-  if (!query) return;
+  if (query === "") return;
 
   const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const regex = new RegExp(`(${escapedQuery})`, "gi");
 
-  function walk(node: ChildNode) {
-    if (node.nodeType === 3 && node.nodeValue && node.nodeValue.match(regex)) {
+  function walk(node: ChildNode): void {
+    if (node.nodeType === 3 && node.nodeValue?.match(regex) != null) {
       // Text node
       const span = document.createElement("span");
-      const parts = node.nodeValue.split(regex);
-      parts.forEach((part) => {
+      const parts = node.nodeValue?.split(regex);
+      parts?.forEach((part) => {
         if (part.toLowerCase() === query.toLowerCase()) {
           // Replace found query with a <mark> element
           const mark = document.createElement("mark");
@@ -65,19 +65,19 @@ function highlightText(searchKey: string) {
   startObserver(); // Restart observer after highlighting
 }
 
-function startObserver() {
+function startObserver(): void {
   document.querySelectorAll("article").forEach((article) => {
     observer.observe(article, { childList: true, subtree: true });
   });
 }
 
-export function initSearch() {
+export function initSearch(): void {
   const searchForm = document.querySelector<HTMLElement>(".search");
-  if (!searchForm) return;
+  if (searchForm == null) return;
 
   const queryInput =
     searchForm.querySelector<HTMLInputElement>('input[name="q"]');
-  if (!queryInput) return;
+  if (queryInput == null) return;
 
   searchForm.addEventListener("submit", function (e) {
     e.preventDefault();

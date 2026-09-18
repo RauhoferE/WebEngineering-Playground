@@ -30,25 +30,31 @@ async function fetchImageUrl(fileName: string): Promise<string> {
   }
 }
 
-async function extractBears(wikitext: string) {
+async function extractBears(wikitext: string): Promise<Bear[]> {
   const rows = wikitext.split("{{Species table/row");
 
   const parsedRows = rows
-    .map((row) => {
+    .map((row): ParsedBear | null => {
       const nameMatch = row.match(/\|name=\[\[(.*?)\]\]/);
       const binomialMatch = row.match(/\|binomial=(.*?)\n/);
       const imageMatch = row.match(/\|image=(.*?)\n/);
       const rangeMatch = row.match(/\|range=(.*?)(?=\||$|\n)/);
 
-      if (!nameMatch || !binomialMatch || !rangeMatch) return null;
+      if (nameMatch == null || binomialMatch == null || rangeMatch == null)
+        return null;
 
-      if (!nameMatch[1] || !binomialMatch[1] || !rangeMatch[1]) {
+      if (
+        nameMatch[1] == null ||
+        nameMatch[1] == null ||
+        binomialMatch[1] == null ||
+        rangeMatch[1] == null
+      ) {
         return null;
       }
 
       let fileName: string | null = null;
 
-      if (imageMatch?.[1]) {
+      if (imageMatch?.[1] != null) {
         fileName = imageMatch[1].trim().replace("File:", "");
       }
 
@@ -57,7 +63,7 @@ async function extractBears(wikitext: string) {
         binomial: binomialMatch[1],
         range: rangeMatch[1],
         fileName,
-      } as ParsedBear;
+      } satisfies ParsedBear;
     })
     .filter((row) => row !== null);
 
@@ -66,18 +72,19 @@ async function extractBears(wikitext: string) {
       name: row.name,
       binomial: row.binomial,
       range: row.range,
-      image: row.fileName
-        ? await fetchImageUrl(row.fileName)
-        : "/media/placeholder.svg",
+      image:
+        row.fileName != null
+          ? await fetchImageUrl(row.fileName)
+          : "/media/placeholder.svg",
     })),
   );
 
   return bears;
 }
 
-async function createBearElements(bears: Bear[]) {
+async function createBearElements(bears: Bear[]): Promise<void> {
   const moreBears = document.querySelector(".more_bears");
-  if (!moreBears) {
+  if (moreBears == null) {
     return;
   }
 
@@ -106,7 +113,7 @@ async function createBearElements(bears: Bear[]) {
   moreBears.appendChild(fragment);
 }
 
-export async function loadBearData() {
+export async function loadBearData(): Promise<void> {
   const params: Record<string, string> = {
     action: "parse",
     page: "List_of_ursids",

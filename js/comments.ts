@@ -1,13 +1,13 @@
-export function initComments() {
+export function initComments(): void {
   // Show/hide comments toggle
   const showHideBtn = document.querySelector<HTMLElement>(".show-hide");
   const commentWrapper =
     document.querySelector<HTMLElement>(".comment-wrapper");
 
-  if (!showHideBtn || !commentWrapper) return;
+  if (showHideBtn == null || commentWrapper == null) return;
 
   showHideBtn.addEventListener("click", function () {
-    if (!commentWrapper) return;
+    if (commentWrapper == null) return;
 
     if (commentWrapper.classList.contains("hidden")) {
       showHideBtn.textContent = "Hide comments";
@@ -27,11 +27,12 @@ export function initComments() {
   const commentField = document.querySelector<HTMLInputElement>("#comment");
   const list = document.querySelector<HTMLElement>(".comment-container");
 
-  if (!form || !nameField || !commentField || !list) return;
+  if (form == null || nameField == null || commentField == null || list == null)
+    return;
 
   form.onsubmit = function (e) {
     e.preventDefault();
-    if (!nameField || !commentField || !list) return;
+    if (nameField == null || commentField == null || list == null) return;
 
     const nameValue = nameField.value;
     const commentValue = commentField.value;

@@ -165,3 +165,16 @@ So in out case it lint-staged
 Only runs the prettier and eslint against staged git files in the commit.
 
 Husky is the trigger mechanism and lint-staged is what gets triggered
+
+### Question
+
+**Theory question:** Compare a local pre-commit hook with a CI quality gate. Why is CI still necessary when hooks are configured, and why should CI use non-mutating checks rather than automatically rewriting source files?
+
+CI are still necessary because CI is an actual enforcement point.
+With git commits you can also run --no-verify which skips every hook and there is nothing stoping you.
+Where CI is enforced to run under specific circumstances.
+
+CI should use non mutating checks, because it should answer if this code is correct and not fix it for you.
+
+Also when a CI runs a non mutating check the files would not change in the repo.
+They would only exist in the job workspace.

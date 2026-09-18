@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      # Install strictly from package-lock.json
+      - run: npm ci
+      # Typecheck without emmiting files
+      - run: npm run typecheck
+      # Transpile and bundle application in dist folder
+      - run: npm run build
+      # Run lint check
+      - run: npm run lint
+      # Run prettier check
+      - run: npm run format:check

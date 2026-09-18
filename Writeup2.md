@@ -152,3 +152,16 @@ build -> Given the same source code builds the same app on every machine
 lint/format -> Inspection which is read only
 
 dev->Is not idempotent since it spawns a second server or cant run on the same port
+
+## Task 5
+
+### Husky
+
+Manages git hooks
+So in out case it lint-staged
+
+### Lint-staged
+
+Only runs the prettier and eslint against staged git files in the commit.
+
+Husky is the trigger mechanism and lint-staged is what gets triggered

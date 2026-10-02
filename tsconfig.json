@@ -9,7 +9,8 @@
     "noImplicitReturns": true,
     "isolatedModules": true, // Transpile files in isolation for ts patterns that dont survive this
     "skipLibCheck": true,
-    "noEmit": true // Vite does the actual transpiling
+    "noEmit": true, // Vite does the actual transpiling,
+    "jsx": "react-jsx" // Use the new JSX transform
   },
-  "include": ["js"]
+  "include": ["js", "vite.config.ts"]
 }

@@ -1,4 +1,5 @@
 import type { ReactElement } from "react";
+import { Comments } from "./comments";
 import { Highlight, SearchForm, SearchProvider } from "./search";
 
 export default function App(): ReactElement {
@@ -154,48 +155,7 @@ export default function App(): ReactElement {
             <br />
             <Highlight text="Evan Wild is an unemployed plumber from Doncaster..." />
           </aside>
-          <section className="comments">
-            <div className="show-hide">Show comment</div>
-
-            <div className="comment-wrapper hidden">
-              <span style={{ fontSize: "xx-large" }}>Add comment</span>
-              <form className="comment-form">
-                <div className="flex-pair">
-                  Your name:
-                  <input
-                    type="text"
-                    name="name"
-                    id="name"
-                    placeholder="Enter your name"
-                  />
-                </div>
-                <div className="flex-pair">
-                  Your comment:
-                  <input
-                    type="text"
-                    name="comment"
-                    id="comment"
-                    placeholder="Enter your comment"
-                  />
-                </div>
-                <div>
-                  <input type="submit" value="Submit comment" />
-                </div>
-              </form>
-
-              <span style={{ fontSize: "xx-large" }}>Comments</span>
-              <ul className="comment-container">
-                <li>
-                  <p>
-                    <Highlight text="Bob Fossil" />
-                  </p>
-                  <p>
-                    <Highlight text="Oh I am so glad you taught me all about the big brown angry guys..." />
-                  </p>
-                </li>
-              </ul>
-            </div>
-          </section>
+          <Comments />
           <section className="more_bears">
             <span style={{ fontSize: "x-large" }}>More Bears</span>
           </section>

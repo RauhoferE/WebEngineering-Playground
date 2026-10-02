@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactElement } from "react";
 import { fetchBears } from "./bears.api";
-import { Highlight } from "./search";
-import { type Bear } from "./types";
+import { Highlight } from "../search/search";
+import { type Bear } from "../../types";
 
 export function BearList(): ReactElement {
   const [bears, setBears] = useState<Bear[]>([]);

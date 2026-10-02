@@ -1,5 +1,5 @@
 import { useRef, useState, type FormEvent, type ReactElement } from "react";
-import { Highlight } from "./search";
+import { Highlight } from "../search/search";
 
 interface CommentEntry {
   id: number;

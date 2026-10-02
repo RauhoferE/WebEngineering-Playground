@@ -3,7 +3,7 @@ import {
   type ImageQueryResponse,
   type WikiPage,
   type WikitextResponse,
-} from "./types";
+} from "../../types";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;

@@ -3,35 +3,16 @@ import { BearList } from "./features/bears/BearList";
 import { Comments } from "./features/comments/Comments";
 import { Highlight } from "./features/search/Highlight";
 import { SearchProvider } from "./features/search/SearchContext";
-import { SearchForm } from "./features/search/SearchForm";
+import { Header } from "./features/layout/Header";
+import { NavBar } from "./features/layout/NavBar";
+import { SideBar } from "./features/layout/SideBar";
+import { Footer } from "./features/layout/Footer";
 
 export default function App(): ReactElement {
   return (
     <SearchProvider>
-      <div className="header">
-        <span style={{ fontSize: "xxx-large" }}>
-          Welcome to our wildlife website
-        </span>
-      </div>
-
-      <div className="nav">
-        <ul>
-          <li>
-            <a href="#">Home</a>
-          </li>
-          <li>
-            <a href="#">Our team</a>
-          </li>
-          <li>
-            <a href="#">Projects</a>
-          </li>
-          <li>
-            <a href="#">Blog</a>
-          </li>
-        </ul>
-
-        <SearchForm />
-      </div>
+      <Header />
+      <NavBar />
 
       <main>
         <article>
@@ -161,32 +142,10 @@ export default function App(): ReactElement {
           <Comments />
           <BearList />
         </article>
-
-        <div className="secondary">
-          <span style={{ fontSize: "xx-large" }}>Related</span>
-          <ul>
-            <li>
-              <a href="#">The trouble with Bees</a>
-            </li>
-            <li>
-              <a href="#">The trouble with Otters</a>
-            </li>
-            <li>
-              <a href="#">The trouble with Penguins</a>
-            </li>
-            <li>
-              <a href="#">The trouble with Octopi</a>
-            </li>
-            <li>
-              <a href="#">The trouble with Lemurs</a>
-            </li>
-          </ul>
-        </div>
+        <SideBar />
       </main>
 
-      <footer>
-        <p>©Copyright 2050 by nobody. All rights reversed.</p>
-      </footer>
+      <Footer />
     </SearchProvider>
   );
 }

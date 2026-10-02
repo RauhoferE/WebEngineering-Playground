@@ -1,5 +1,5 @@
 import type { ReactElement } from "react";
-import { BearList } from "./features/bears/bears";
+import { BearList } from "./features/bears/BearList";
 import { Comments } from "./features/comments/Comments";
 import {
   Highlight,

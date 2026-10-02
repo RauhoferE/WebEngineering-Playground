@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactElement } from "react";
 import { fetchBears } from "./bears.api";
-import { Highlight } from "../search/search";
 import { type Bear } from "../../types";
+import { BearCard } from "./BearCard";
 
 export function BearList(): ReactElement {
   const [bears, setBears] = useState<Bear[]>([]);
@@ -27,23 +27,8 @@ export function BearList(): ReactElement {
     <section className="more_bears">
       <span style={{ fontSize: "x-large" }}>More Bears</span>
       {error !== null && <p>{error}</p>}
-      {bears.map((bear) => (
-        <div className="bear" key={`${bear.name}-${bear.binomial}`}>
-          <img
-            src={bear.image}
-            alt={`Image of ${bear.name}`}
-            style={{ width: "200px", height: "auto" }}
-          />
-          <p>
-            <b>
-              <Highlight text={bear.name} />
-            </b>{" "}
-            (<Highlight text={bear.binomial} />)
-          </p>
-          <p>
-            Range: <Highlight text={bear.range} />
-          </p>
-        </div>
+      {bears.map((bear, index) => (
+        <BearCard bear={bear} key={index} />
       ))}
     </section>
   );

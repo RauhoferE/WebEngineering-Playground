@@ -1,5 +1,5 @@
 import { type ReactElement } from "react";
-import { type Bear } from "../../types";
+import { type Bear } from "./bear-models";
 import { Highlight } from "../search/Highlight";
 
 export function BearCard({ bear }: { bear: Bear }): ReactElement {

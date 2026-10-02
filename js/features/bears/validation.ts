@@ -1,9 +1,24 @@
-import {
-  type ImageInfo,
-  type ImageQueryResponse,
-  type WikiPage,
-  type WikitextResponse,
-} from "../../types";
+interface ImageInfo {
+  url: string;
+}
+
+interface WikiPage {
+  imageinfo?: ImageInfo[];
+}
+
+interface ImageQueryResponse {
+  query: {
+    pages: Record<string, WikiPage>;
+  };
+}
+
+interface WikitextResponse {
+  parse: {
+    wikitext: {
+      "*": string;
+    };
+  };
+}
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;

@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactElement } from "react";
 import { fetchBears } from "./bears.api";
-import { type Bear } from "../../types";
+import { type Bear } from "./bear-models";
 import { BearCard } from "./BearCard";
 
 export function BearList(): ReactElement {

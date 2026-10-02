@@ -1,4 +1,4 @@
-import { type Bear, type ParsedBear } from "../../types";
+import { type Bear, type ParsedBear } from "./bear-models";
 import { isImageQueryResponse, isWikitextResponse } from "./validation";
 
 const baseUrl = "https://en.wikipedia.org/w/api.php";

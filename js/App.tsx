@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
 import { BearList } from "./features/bears/bears";
-import { Comments } from "./features/comments/comments";
+import { Comments } from "./features/comments/Comments";
 import {
   Highlight,
   SearchForm,

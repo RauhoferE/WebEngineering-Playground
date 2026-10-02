@@ -1,7 +1,26 @@
 import { type ReactElement } from "react";
 import { Highlight } from "../search/Highlight";
+import { BearTableRow, type BearTableRowProps } from "./BearTableRow";
 
 export function BearTable(): ReactElement {
+  const bears: BearTableRowProps[] = [
+    {
+      type: "Wild",
+      coat: "Brown or black",
+      adult_size: "1.4 to 2.8 meters",
+      habitat: "Woods and forests",
+      lifespan: "25 to 28 years",
+      diet: "Fish, meat, plants",
+    },
+    {
+      type: "Urban",
+      coat: "North Face",
+      adult_size: "18 to 22 meters",
+      habitat: "Condos and coffe shops",
+      lifespan: "20 to 32 years",
+      diet: "Starbucks, sushi",
+    },
+  ];
   return (
     <table>
       <thead>
@@ -27,46 +46,9 @@ export function BearTable(): ReactElement {
         </tr>
       </thead>
       <tbody>
-        <tr>
-          <td>
-            <Highlight text="Wild" />
-          </td>
-          <td>
-            <Highlight text="Brown or black" />
-          </td>
-          <td>
-            <Highlight text="1.4 to 2.8 meters" />
-          </td>
-          <td>
-            <Highlight text="Woods and forests" />
-          </td>
-          <td>
-            <Highlight text="25 to 28 years" />
-          </td>
-          <td>
-            <Highlight text="Fish, meat, plants" />
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <Highlight text="Urban" />
-          </td>
-          <td>
-            <Highlight text="North Face" />
-          </td>
-          <td>
-            <Highlight text="18 to 22" />
-          </td>
-          <td>
-            <Highlight text="Condos and coffee shops" />
-          </td>
-          <td>
-            <Highlight text="20 to 32 years" />
-          </td>
-          <td>
-            <Highlight text="Starbucks, sushi" />
-          </td>
-        </tr>
+        {bears.map((bear: BearTableRowProps, index: number) => (
+          <BearTableRow row={bear} key={index} />
+        ))}
       </tbody>
     </table>
   );

@@ -26,7 +26,7 @@ export default function App(): ReactElement {
         <SideBar links={sideBarLinks} />
       </main>
 
-      <Footer />
+      <Footer text="©Copyright 2050 by Emre. All rights reversed." />
     </SearchProvider>
   );
 }

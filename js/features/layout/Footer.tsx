@@ -1,9 +1,9 @@
 import { type ReactElement } from "react";
 
-export function Footer(): ReactElement {
+export function Footer({ text }: { text: string }): ReactElement {
   return (
     <footer>
-      <p>©Copyright 2050 by Emre. All rights reversed.</p>
+      <p>{text}</p>
     </footer>
   );
 }

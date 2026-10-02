@@ -1,6 +1,6 @@
 import { type ReactElement } from "react";
 import { type Bear } from "../../types";
-import { Highlight } from "../search/search";
+import { Highlight } from "../search/Highlight";
 
 export function BearCard({ bear }: { bear: Bear }): ReactElement {
   return (

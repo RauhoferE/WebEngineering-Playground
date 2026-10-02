@@ -1,11 +1,9 @@
 import type { ReactElement } from "react";
 import { BearList } from "./features/bears/BearList";
 import { Comments } from "./features/comments/Comments";
-import {
-  Highlight,
-  SearchForm,
-  SearchProvider,
-} from "./features/search/search";
+import { Highlight } from "./features/search/Highlight";
+import { SearchProvider } from "./features/search/SearchContext";
+import { SearchForm } from "./features/search/SearchForm";
 
 export default function App(): ReactElement {
   return (

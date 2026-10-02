@@ -1,7 +1,12 @@
-import { initSearch } from "./search";
-import { initComments } from "./comments";
-import { loadBearData } from "./bears.api";
+import App from "./App";
+import { createRoot } from "react-dom/client";
+import { StrictMode } from "react";
 
-initSearch();
-initComments();
-await loadBearData();
+const container = document.getElementById("root");
+if (container === null) throw new Error("Root element not found");
+
+createRoot(container).render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+);

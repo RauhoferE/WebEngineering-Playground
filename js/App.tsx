@@ -1,4 +1,5 @@
 import type { ReactElement } from "react";
+import { BearList } from "./bears";
 import { Comments } from "./comments";
 import { Highlight, SearchForm, SearchProvider } from "./search";
 
@@ -156,9 +157,7 @@ export default function App(): ReactElement {
             <Highlight text="Evan Wild is an unemployed plumber from Doncaster..." />
           </aside>
           <Comments />
-          <section className="more_bears">
-            <span style={{ fontSize: "x-large" }}>More Bears</span>
-          </section>
+          <BearList />
         </article>
 
         <div className="secondary">

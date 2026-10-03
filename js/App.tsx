@@ -5,6 +5,8 @@ import { NavBar } from "./features/layout/NavBar";
 import { SideBar } from "./features/layout/SideBar";
 import { Footer } from "./features/layout/Footer";
 import { Article } from "./features/article/Article";
+import { Link, Route, Routes } from "react-router";
+import { BearDetail } from "./features/bears/BearDetail";
 
 export default function App(): ReactElement {
   const links = ["Home", "Our team", "Projects", "Blog"];
@@ -21,7 +23,18 @@ export default function App(): ReactElement {
       <NavBar links={links} />
 
       <main>
-        <Article />
+        <Routes>
+          <Route path="/" element={<Article />} />
+          <Route path="/bear/:bearId" element={<BearDetail />} />
+          <Route
+            path="*"
+            element={
+              <p>
+                Page not found. <Link to="/">Go home</Link>
+              </p>
+            }
+          />
+        </Routes>
 
         <SideBar links={sideBarLinks} />
       </main>

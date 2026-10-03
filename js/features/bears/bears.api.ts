@@ -73,6 +73,7 @@ async function extractBears(
   // Promise.all keeps the order of parsedRows, whichever image resolves first
   return await Promise.all(
     parsedRows.map(async (row) => ({
+      id: toBearId(row.binomial),
       name: row.name,
       binomial: row.binomial,
       range: row.range,
@@ -106,4 +107,8 @@ export async function fetchBears(signal: AbortSignal): Promise<Bear[]> {
     throw new Error("Unexpected response shape from the Wikipedia API");
   }
   return await extractBears(data.parse.wikitext["*"], signal);
+}
+
+function toBearId(binomial: string): string {
+  return binomial.trim().toLowerCase().replace(/\s+/g, "-");
 }

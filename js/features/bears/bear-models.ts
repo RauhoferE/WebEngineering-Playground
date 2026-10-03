@@ -1,4 +1,5 @@
 export interface Bear {
+  id: string;
   name: string;
   binomial: string;
   image: string;

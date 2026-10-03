@@ -22,9 +22,12 @@ export function CommentForm({
       return;
     }
 
+    const trimmedName = name.trim();
+    const trimmedText = text.trim();
+
     const id = nextId.current;
     nextId.current += 1;
-    onSubmit({ id, name, text });
+    onSubmit({ id, name: trimmedName, text: trimmedText });
     setName("");
     setText("");
   };

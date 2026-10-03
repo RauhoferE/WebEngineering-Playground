@@ -1,14 +1,21 @@
-import { type ReactElement } from "react";
+import { useState, type ReactElement } from "react";
 import { type Bear } from "./bear-models";
 import { Highlight } from "../search/Highlight";
+import { placeholderImage } from "./bears.api";
 
 export function BearCard({ bear }: { bear: Bear }): ReactElement {
+  // Used for if url exists but image cant be loaded
+  const [imageFailed, setImageFailed] = useState(false);
+
   return (
-    <div className="bear" key={`${bear.name}-${bear.binomial}`}>
+    <div className="bear">
       <img
-        src={bear.image}
+        src={imageFailed ? placeholderImage : bear.image}
         alt={`Image of ${bear.name}`}
         style={{ width: "200px", height: "auto" }}
+        onError={() => {
+          setImageFailed(true);
+        }}
       />
       <p>
         <b>

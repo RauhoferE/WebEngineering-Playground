@@ -11,3 +11,9 @@ export interface ParsedBear {
   fileName: string | null;
   range: string;
 }
+
+export type BearsState =
+  | { status: "loading" }
+  | { status: "success"; bears: Bear[] }
+  | { status: "empty" }
+  | { status: "error"; message: string };

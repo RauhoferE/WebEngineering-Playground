@@ -2,9 +2,12 @@ import { type Bear, type ParsedBear } from "./bear-models";
 import { isImageQueryResponse, isWikitextResponse } from "./validation";
 
 const baseUrl = "https://en.wikipedia.org/w/api.php";
-const placeholderImage = "/media/placeholder.svg";
+export const placeholderImage = "/media/placeholder.svg";
 
-async function fetchImageUrl(fileName: string): Promise<string> {
+async function fetchImageUrl(
+  fileName: string,
+  signal: AbortSignal,
+): Promise<string> {
   const imageParams: Record<string, string> = {
     action: "query",
     titles: "File:" + fileName,
@@ -16,7 +19,11 @@ async function fetchImageUrl(fileName: string): Promise<string> {
 
   const url = baseUrl + "?" + new URLSearchParams(imageParams).toString();
   try {
-    const res = await fetch(url);
+    // Abort signal ensuring that slow, outdated API responses don't accidentally overwrite newer data
+    const res = await fetch(url, { signal });
+    if (!res.ok) {
+      return placeholderImage;
+    }
     const data: unknown = await res.json();
     if (!isImageQueryResponse(data)) {
       return placeholderImage;
@@ -28,7 +35,10 @@ async function fetchImageUrl(fileName: string): Promise<string> {
   }
 }
 
-async function extractBears(wikitext: string): Promise<Bear[]> {
+async function extractBears(
+  wikitext: string,
+  signal: AbortSignal,
+): Promise<Bear[]> {
   const rows = wikitext.split("{{Species table/row");
 
   const parsedRows = rows
@@ -68,14 +78,14 @@ async function extractBears(wikitext: string): Promise<Bear[]> {
       range: row.range,
       image:
         row.fileName != null
-          ? await fetchImageUrl(row.fileName)
+          ? await fetchImageUrl(row.fileName, signal)
           : placeholderImage,
     })),
   );
 }
 
 // Throws if the request fails or the response has an unexpected shape
-export async function fetchBears(): Promise<Bear[]> {
+export async function fetchBears(signal: AbortSignal): Promise<Bear[]> {
   const params: Record<string, string> = {
     action: "parse",
     page: "List_of_ursids",
@@ -86,6 +96,7 @@ export async function fetchBears(): Promise<Bear[]> {
   };
   const res = await fetch(
     baseUrl + "?" + new URLSearchParams(params).toString(),
+    { signal },
   );
   if (!res.ok) {
     throw new Error(`Wikipedia request failed with status ${res.status}`);
@@ -94,5 +105,5 @@ export async function fetchBears(): Promise<Bear[]> {
   if (!isWikitextResponse(data)) {
     throw new Error("Unexpected response shape from the Wikipedia API");
   }
-  return await extractBears(data.parse.wikitext["*"]);
+  return await extractBears(data.parse.wikitext["*"], signal);
 }

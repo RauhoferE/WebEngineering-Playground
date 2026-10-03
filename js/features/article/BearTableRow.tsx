@@ -1,5 +1,5 @@
-import { type ReactElement } from "react";
-import { Highlight } from "../search/Highlight";
+import { type ReactElement } from 'react';
+import { Highlight } from '../search/Highlight';
 
 export interface BearTableRowProps {
   type: string;

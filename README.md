@@ -85,7 +85,7 @@ Find and eliminate the remaining bad coding practices. Consider scope, accidenta
 >
 > ```js
 > console.log(
->   "Make use of markdown codesnippets to show and explain good/bad practices!",
+>   'Make use of markdown codesnippets to show and explain good/bad practices!'
 > );
 > ```
 

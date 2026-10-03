@@ -1,16 +1,16 @@
-import { Link, useParams } from "react-router";
-import { useBears } from "./useBears";
-import { BearImage } from "./BearImage";
-import { type ReactElement } from "react";
+import { Link, useParams } from 'react-router';
+import { useBears } from './useBears';
+import { BearImage } from './BearImage';
+import { type ReactElement } from 'react';
 
 export function BearDetail(): ReactElement {
   const { bearId } = useParams();
   const state = useBears();
-  if (state.status === "loading") return <p>Loading bear…</p>;
-  if (state.status === "error") return <p role="alert">{state.message}</p>;
+  if (state.status === 'loading') return <p>Loading bear…</p>;
+  if (state.status === 'error') return <p role="alert">{state.message}</p>;
 
   const bear =
-    state.status === "success"
+    state.status === 'success'
       ? state.bears.find((b) => b.id === bearId)
       : undefined;
   if (bear === undefined)

@@ -1,54 +1,54 @@
-import { type ReactElement } from "react";
-import { Comments } from "../comments/Comments";
-import { BearList } from "../bears/BearList";
-import { Author } from "./Author";
-import { BearTable } from "./BearTable";
-import { ArticleElement, type ArticleElementProps } from "./ArticleElement";
+import { type ReactElement } from 'react';
+import { Comments } from '../comments/Comments';
+import { BearList } from '../bears/BearList';
+import { Author } from './Author';
+import { BearTable } from './BearTable';
+import { ArticleElement, type ArticleElementProps } from './ArticleElement';
 
 export function Article(): ReactElement {
   const elements: ArticleElementProps[] = [
     {
-      title: "The trouble with Bears",
+      title: 'The trouble with Bears',
       textElements: [
         {
-          text: "By Evan Wild",
+          text: 'By Evan Wild',
         },
         {
-          text: "Tall, lumbering, angry, dangerous. The real live bears of this world are proud, independent creatures, self-serving and always on the hunt for food.",
+          text: 'Tall, lumbering, angry, dangerous. The real live bears of this world are proud, independent creatures, self-serving and always on the hunt for food.',
         },
       ],
     },
     {
-      title: "Types of bear",
+      title: 'Types of bear',
       textElements: [],
     },
   ];
 
   const elements2: ArticleElementProps[] = [
     {
-      title: "Habitats and Eating habits",
+      title: 'Habitats and Eating habits',
       textElements: [
         {
-          text: "Wild bears eat a variety of meat, fish, fruit, nuts, and other natually growing ingredients...",
+          text: 'Wild bears eat a variety of meat, fish, fruit, nuts, and other natually growing ingredients...',
         },
         {
-          text: "Wild bear in forest",
-          imgSource: "/media/wild-bear.jpg",
+          text: 'Wild bear in forest',
+          imgSource: '/media/wild-bear.jpg',
         },
         {
-          text: "Urban (gentrified) bears on the other hand have largely abandoned the old ways...",
+          text: 'Urban (gentrified) bears on the other hand have largely abandoned the old ways...',
         },
         {
-          text: "Urban bear near buildings",
-          imgSource: "/media/urban-bear.jpg",
+          text: 'Urban bear near buildings',
+          imgSource: '/media/urban-bear.jpg',
         },
       ],
     },
     {
-      title: "Mating rituals",
+      title: 'Mating rituals',
       textElements: [
         {
-          text: "Bears are romantic creatures by nature...",
+          text: 'Bears are romantic creatures by nature...',
         },
       ],
     },

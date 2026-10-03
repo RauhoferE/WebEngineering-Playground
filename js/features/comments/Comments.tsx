@@ -1,7 +1,7 @@
-import { useState, type ReactElement } from "react";
-import { type CommentEntry } from "./comment-models";
-import { CommentForm } from "./CommentForm";
-import { CommentList } from "./CommentList";
+import { useState, type ReactElement } from 'react';
+import { type CommentEntry } from './comment-models';
+import { CommentForm } from './CommentForm';
+import { CommentList } from './CommentList';
 
 export function Comments(): ReactElement {
   // The state for the visibility of the comments section
@@ -10,8 +10,8 @@ export function Comments(): ReactElement {
   const [comments, setComments] = useState<CommentEntry[]>([
     {
       id: 0,
-      name: "Bob Fossil",
-      text: "Oh I am so glad you taught me all about the big brown angry guys...",
+      name: 'Bob Fossil',
+      text: 'Oh I am so glad you taught me all about the big brown angry guys...',
     },
   ]);
 
@@ -23,19 +23,19 @@ export function Comments(): ReactElement {
           setVisible((previous) => !previous);
         }}
       >
-        {visible ? "Hide comments" : "Show comments"}
+        {visible ? 'Hide comments' : 'Show comments'}
       </div>
 
       {/* The stylesheet matches this exact class attribute value */}
-      <div className={`comment-wrapper ${visible ? "visible" : "hidden"}`}>
-        <span style={{ fontSize: "xx-large" }}>Add comment</span>
+      <div className={`comment-wrapper ${visible ? 'visible' : 'hidden'}`}>
+        <span style={{ fontSize: 'xx-large' }}>Add comment</span>
         <CommentForm
           onSubmit={(comment: CommentEntry) => {
             setComments((previous) => [...previous, comment]);
           }}
         />
 
-        <span style={{ fontSize: "xx-large" }}>Comments</span>
+        <span style={{ fontSize: 'xx-large' }}>Comments</span>
         <CommentList comments={comments} />
       </div>
     </section>

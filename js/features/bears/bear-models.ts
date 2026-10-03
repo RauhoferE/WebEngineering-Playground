@@ -14,7 +14,7 @@ export interface ParsedBear {
 }
 
 export type BearsState =
-  | { status: "loading" }
-  | { status: "success"; bears: Bear[] }
-  | { status: "empty" }
-  | { status: "error"; message: string };
+  | { status: 'loading' }
+  | { status: 'success'; bears: Bear[] }
+  | { status: 'empty' }
+  | { status: 'error'; message: string };

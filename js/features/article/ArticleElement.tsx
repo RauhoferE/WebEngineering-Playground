@@ -1,5 +1,5 @@
-import { type ReactElement } from "react";
-import { Highlight } from "../search/Highlight";
+import { type ReactElement } from 'react';
+import { Highlight } from '../search/Highlight';
 
 export interface ArticleElementProps {
   title: string;
@@ -16,7 +16,7 @@ export function ArticleElement({
   textElements,
 }: ArticleElementProps): ReactElement {
   return (
-    <span style={{ fontSize: "x-large" }}>
+    <span style={{ fontSize: 'x-large' }}>
       <Highlight text={title} />
       {textElements.map((el, index) => (
         <div key={index}>

@@ -1,23 +1,23 @@
-import { type Bear, type ParsedBear } from "./bear-models";
-import { isImageQueryResponse, isWikitextResponse } from "./validation";
+import { type Bear, type ParsedBear } from './bear-models';
+import { isImageQueryResponse, isWikitextResponse } from './validation';
 
-const baseUrl = "https://en.wikipedia.org/w/api.php";
-export const placeholderImage = "/media/placeholder.svg";
+const baseUrl = 'https://en.wikipedia.org/w/api.php';
+export const placeholderImage = '/media/placeholder.svg';
 
 async function fetchImageUrl(
   fileName: string,
-  signal: AbortSignal,
+  signal: AbortSignal
 ): Promise<string> {
   const imageParams: Record<string, string> = {
-    action: "query",
-    titles: "File:" + fileName,
-    prop: "imageinfo",
-    iiprop: "url",
-    format: "json",
-    origin: "*",
+    action: 'query',
+    titles: 'File:' + fileName,
+    prop: 'imageinfo',
+    iiprop: 'url',
+    format: 'json',
+    origin: '*',
   };
 
-  const url = baseUrl + "?" + new URLSearchParams(imageParams).toString();
+  const url = baseUrl + '?' + new URLSearchParams(imageParams).toString();
   try {
     // Abort signal ensuring that slow, outdated API responses don't accidentally overwrite newer data
     const res = await fetch(url, { signal });
@@ -37,9 +37,9 @@ async function fetchImageUrl(
 
 async function extractBears(
   wikitext: string,
-  signal: AbortSignal,
+  signal: AbortSignal
 ): Promise<Bear[]> {
-  const rows = wikitext.split("{{Species table/row");
+  const rows = wikitext.split('{{Species table/row');
 
   const parsedRows = rows
     .map((row): ParsedBear | null => {
@@ -58,7 +58,7 @@ async function extractBears(
 
       const fileName =
         imageMatch?.[1] != null
-          ? imageMatch[1].trim().replace("File:", "")
+          ? imageMatch[1].trim().replace('File:', '')
           : null;
 
       return {
@@ -81,30 +81,30 @@ async function extractBears(
         row.fileName != null
           ? await fetchImageUrl(row.fileName, signal)
           : placeholderImage,
-    })),
+    }))
   );
 }
 
 // Throws if the request fails or the response has an unexpected shape
 export async function fetchBears(signal: AbortSignal): Promise<Bear[]> {
   const params: Record<string, string> = {
-    action: "parse",
-    page: "List_of_ursids",
-    prop: "wikitext",
-    section: "3",
-    format: "json",
-    origin: "*",
+    action: 'parse',
+    page: 'List_of_ursids',
+    prop: 'wikitext',
+    section: '3',
+    format: 'json',
+    origin: '*',
   };
   const res = await fetch(
-    baseUrl + "?" + new URLSearchParams(params).toString(),
-    { signal },
+    baseUrl + '?' + new URLSearchParams(params).toString(),
+    { signal }
   );
   if (!res.ok) {
     throw new Error(`Wikipedia request failed with status ${res.status}`);
   }
   const data: unknown = await res.json();
   if (!isWikitextResponse(data)) {
-    throw new Error("Unexpected response shape from the Wikipedia API");
+    throw new Error('Unexpected response shape from the Wikipedia API');
   }
-  return await extractBears(data.parse.wikitext["*"], signal);
+  return await extractBears(data.parse.wikitext['*'], signal);
 }

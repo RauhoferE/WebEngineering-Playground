@@ -1,11 +1,11 @@
-import { type FormEvent, type ReactElement, useState } from "react";
-import { useSearch } from "./SearchContext";
+import { type FormEvent, type ReactElement, useState } from 'react';
+import { useSearch } from './SearchContext';
 
 export function SearchForm(): ReactElement {
   // Shared query in context -> Only changes when form is submitted
   const { setQuery } = useSearch();
   // Holds what is currently beeing typed
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState('');
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>): void => {
     e.preventDefault();

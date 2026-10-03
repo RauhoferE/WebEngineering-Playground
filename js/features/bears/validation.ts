@@ -15,17 +15,17 @@ interface ImageQueryResponse {
 interface WikitextResponse {
   parse: {
     wikitext: {
-      "*": string;
+      '*': string;
     };
   };
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
+  return typeof value === 'object' && value !== null;
 }
 
 function isImageInfo(value: unknown): value is ImageInfo {
-  return isRecord(value) && typeof value.url === "string";
+  return isRecord(value) && typeof value.url === 'string';
 }
 
 function isWikiPage(value: unknown): value is WikiPage {
@@ -35,7 +35,7 @@ function isWikiPage(value: unknown): value is WikiPage {
 }
 
 export function isImageQueryResponse(
-  value: unknown,
+  value: unknown
 ): value is ImageQueryResponse {
   if (
     !isRecord(value) ||
@@ -55,5 +55,5 @@ export function isWikitextResponse(value: unknown): value is WikitextResponse {
   ) {
     return false;
   }
-  return typeof value.parse.wikitext["*"] === "string";
+  return typeof value.parse.wikitext['*'] === 'string';
 }

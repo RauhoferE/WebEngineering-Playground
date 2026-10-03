@@ -1,15 +1,13 @@
-import { type ReactElement } from "react";
+import { type ReactElement } from 'react';
+import { Link } from 'react-router';
+import { type NavLinkProps } from './nav-link-models';
 
-interface NavLinkProps {
-  href: string;
-  name: string;
-}
 export function NavLink({ links }: { links: NavLinkProps[] }): ReactElement {
   return (
     <ul>
       {links.map((link, index) => (
         <li key={index}>
-          <a href={link.href}>{link.name}</a>
+          <Link to={link.href}>{link.name}</Link>
         </li>
       ))}
     </ul>

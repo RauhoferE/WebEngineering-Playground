@@ -1,4 +1,4 @@
-import { type FormEvent, type ReactElement, useRef, useState } from "react";
+import { type FormEvent, type ReactElement, useRef, useState } from 'react';
 
 export function CommentForm({
   onSubmit,
@@ -6,10 +6,10 @@ export function CommentForm({
   onSubmit: (comment: { id: number; name: string; text: string }) => void;
 }): ReactElement {
   // The state for the name input field
-  const [name, setName] = useState("");
+  const [name, setName] = useState('');
 
   // The state for the comment input field
-  const [text, setText] = useState("");
+  const [text, setText] = useState('');
 
   // useRef is used for non UI states
   const nextId = useRef(1);
@@ -28,8 +28,8 @@ export function CommentForm({
     const id = nextId.current;
     nextId.current += 1;
     onSubmit({ id, name: trimmedName, text: trimmedText });
-    setName("");
-    setText("");
+    setName('');
+    setText('');
   };
 
   return (

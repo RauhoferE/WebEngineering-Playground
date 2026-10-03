@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
-import { type BearsState } from "./bear-models";
-import { fetchBears } from "./bears.api";
+import { useEffect, useState } from 'react';
+import { type BearsState } from './bear-models';
+import { fetchBears } from './bears.api';
 
 export function useBears(): BearsState {
-  const [state, setState] = useState<BearsState>({ status: "loading" });
+  const [state, setState] = useState<BearsState>({ status: 'loading' });
   useEffect(() => {
     const controller = new AbortController();
 
@@ -13,16 +13,16 @@ export function useBears(): BearsState {
         if (controller.signal.aborted) return;
         setState(
           bears.length === 0
-            ? { status: "empty" }
-            : { status: "success", bears },
+            ? { status: 'empty' }
+            : { status: 'success', bears }
         );
       })
       .catch(() => {
         // SHow no error if fetch was aborted
         if (controller.signal.aborted) return;
         setState({
-          status: "error",
-          message: "Error: Bears could not be fetched",
+          status: 'error',
+          message: 'Error: Bears could not be fetched',
         });
       });
     return () => {

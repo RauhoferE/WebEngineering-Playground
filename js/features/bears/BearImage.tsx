@@ -1,6 +1,6 @@
-import { type ReactElement, useState } from "react";
-import { type Bear } from "./bear-models";
-import { placeholderImage } from "./bears.api";
+import { type ReactElement, useState } from 'react';
+import { type Bear } from './bear-models';
+import { placeholderImage } from './bears.api';
 
 export function BearImage({
   bear,

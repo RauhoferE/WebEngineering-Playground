@@ -1,14 +1,14 @@
-import { type ReactNode, type ReactElement } from "react";
-import { type BearsState } from "./bear-models";
-import { BearCard } from "./BearCard";
-import { useBears } from "./useBears";
+import { type ReactNode, type ReactElement } from 'react';
+import { type BearsState } from './bear-models';
+import { BearCard } from './BearCard';
+import { useBears } from './useBears';
 
 export function BearList(): ReactElement {
   const state = useBears();
 
   return (
     <section className="more_bears">
-      <span style={{ fontSize: "x-large" }}>More Bears</span>
+      <span style={{ fontSize: 'x-large' }}>More Bears</span>
       {renderContent(state)}
     </section>
   );
@@ -16,13 +16,13 @@ export function BearList(): ReactElement {
 
 function renderContent(state: BearsState): ReactNode {
   switch (state.status) {
-    case "loading":
+    case 'loading':
       return <p>Loading bears…</p>;
-    case "error":
+    case 'error':
       return <p role="alert">{state.message}</p>;
-    case "empty":
+    case 'empty':
       return <p>No bears found.</p>;
-    case "success":
+    case 'success':
       return state.bears.map((bear) => <BearCard bear={bear} key={bear.id} />);
   }
 }

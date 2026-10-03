@@ -1,21 +1,38 @@
-import type { ReactElement } from "react";
-import { SearchProvider } from "./features/search/SearchContext";
-import { Header } from "./features/layout/Header";
-import { NavBar } from "./features/layout/NavBar";
-import { SideBar } from "./features/layout/SideBar";
-import { Footer } from "./features/layout/Footer";
-import { Article } from "./features/article/Article";
-import { Link, Route, Routes } from "react-router";
-import { BearDetail } from "./features/bears/BearDetail";
+import type { ReactElement } from 'react';
+import { SearchProvider } from './features/search/SearchContext';
+import { Header } from './features/layout/Header';
+import { NavBar } from './features/layout/NavBar';
+import { SideBar } from './features/layout/SideBar';
+import { Footer } from './features/layout/Footer';
+import { Article } from './features/article/Article';
+import { Link, Route, Routes } from 'react-router';
+import { BearDetail } from './features/bears/BearDetail';
 
 export default function App(): ReactElement {
-  const links = ["Home", "Our team", "Projects", "Blog"];
+  const links = [
+    {
+      href: '/',
+      name: 'Home',
+    },
+    {
+      href: '/our-team',
+      name: 'Our team',
+    },
+    {
+      href: '/projects',
+      name: 'Projects',
+    },
+    {
+      href: '/blog',
+      name: 'Blog',
+    },
+  ];
   const sideBarLinks = [
-    "The trouble with Bees",
-    "The trouble with Otters",
-    "The trouble with Penguins",
-    "The trouble with Octopi",
-    "The trouble with Lemurs",
+    'The trouble with Bees',
+    'The trouble with Otters',
+    'The trouble with Penguins',
+    'The trouble with Octopi',
+    'The trouble with Lemurs',
   ];
   return (
     <SearchProvider>

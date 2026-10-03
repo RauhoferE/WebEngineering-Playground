@@ -1,6 +1,6 @@
-import { type ReactElement } from "react";
-import { type CommentEntry } from "./comment-models";
-import { Highlight } from "../search/Highlight";
+import { type ReactElement } from 'react';
+import { type CommentEntry } from './comment-models';
+import { Highlight } from '../search/Highlight';
 
 export function CommentList({
   comments,

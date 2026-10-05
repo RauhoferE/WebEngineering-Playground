@@ -46,6 +46,8 @@ Changing the DOM without react breaks the UI:
 
 ## Task 2
 
+**Theory question:** Explain how component boundaries and typed props act as contracts. What makes a key stable, why does React need keys during reconciliation, and why is an array index unsuitable when list entries can change order?
+
 ### Component Boundaries
 
 Component boundaries seperate the parent who supplies the props and the child who renders from them.
@@ -78,6 +80,8 @@ Array indexs is not suitable since it tracks the position not the item itself.
 So if the position is changed (reorder) the data moves and react attaches the wrong identity.
 
 ## Task 3
+
+**Theory question:** Distinguish props, stored state, and derived values. Explain why direct mutation can produce incorrect React behavior and when lifting state is preferable to introducing context.
 
 ### Props
 
@@ -116,6 +120,8 @@ Every consumer rerenders when the context changes.
 
 ## Task 4
 
+**Theory question:** Why is fetching data a synchronization with an external system rather than part of pure rendering? Explain how cleanup or cancellation prevents race conditions when a component unmounts or a request becomes irrelevant.
+
 Rendering is only pure calculation -> The same props and state return the same output.
 With no side effect.
 
@@ -146,6 +152,8 @@ Prop chnage -> set ignore to true -> old request gets discarded
 AbortController cancels the request instead of ignoring
 
 ## Task 5
+
+**Theory question:** Distinguish client-side rendering, a single-page application, and client-side routing. Compare route parameters with query parameters, and describe one benefit and one cost of the SPA architecture used here.
 
 ### Client side rendering
 

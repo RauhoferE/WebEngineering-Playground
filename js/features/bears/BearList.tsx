@@ -7,8 +7,10 @@ export function BearList(): ReactElement {
   const state = useBears();
 
   return (
-    <section className="more_bears">
-      <span style={{ fontSize: 'x-large' }}>More Bears</span>
+    <section className="more_bears" aria-labelledby="more-bears-heading">
+      <h2 id="more-bears-heading" style={{ fontSize: 'x-large' }}>
+        More Bears
+      </h2>
       {renderContent(state)}
     </section>
   );
@@ -17,7 +19,7 @@ export function BearList(): ReactElement {
 function renderContent(state: BearsState): ReactNode {
   switch (state.status) {
     case 'loading':
-      return <p>Loading bears…</p>;
+      return <p role="status">Loading bears…</p>;
     case 'error':
       return <p role="alert">{state.message}</p>;
     case 'empty':

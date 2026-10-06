@@ -70,7 +70,7 @@ export function Article(): ReactElement {
           textElements={el.textElements}
         />
       ))}
-      <audio controls>
+      <audio controls aria-label="Recording of bear sounds">
         <source src="/media/bear.mp3" type="audio/mp3" />
         <source src="/media/bear.ogg" type="audio/ogg" />
         <p>

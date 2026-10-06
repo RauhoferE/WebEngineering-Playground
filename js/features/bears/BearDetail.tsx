@@ -6,7 +6,7 @@ import { type ReactElement } from 'react';
 export function BearDetail(): ReactElement {
   const { bearId } = useParams();
   const state = useBears();
-  if (state.status === 'loading') return <p>Loading bear…</p>;
+  if (state.status === 'loading') return <p role="status">Loading bear…</p>;
   if (state.status === 'error') return <p role="alert">{state.message}</p>;
 
   const bear =

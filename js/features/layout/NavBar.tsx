@@ -6,9 +6,9 @@ import { type NavLinkProps } from './nav-link-models';
 export function NavBar({ links }: { links: NavLinkProps[] }): ReactElement {
   return (
     <div className="nav">
-      <NavLink
-        links={links.map((link) => ({ href: link.href, name: link.name }))}
-      />
+      <nav className="main-nav" aria-label="Main">
+        <NavLink links={links} markCurrent />
+      </nav>
 
       <SearchForm />
     </div>

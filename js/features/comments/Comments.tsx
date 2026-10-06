@@ -16,26 +16,32 @@ export function Comments(): ReactElement {
   ]);
 
   return (
-    <section className="comments">
-      <div
+    <section className="comments" aria-label="Comments">
+      <button
+        type="button"
         className="show-hide"
+        aria-expanded={visible}
+        aria-controls="comment-wrapper"
         onClick={() => {
           setVisible((previous) => !previous);
         }}
       >
         {visible ? 'Hide comments' : 'Show comments'}
-      </div>
+      </button>
 
       {/* The stylesheet matches this exact class attribute value */}
-      <div className={`comment-wrapper ${visible ? 'visible' : 'hidden'}`}>
-        <span style={{ fontSize: 'xx-large' }}>Add comment</span>
+      <div
+        id="comment-wrapper"
+        className={`comment-wrapper ${visible ? 'visible' : 'hidden'}`}
+      >
+        <h2 style={{ fontSize: 'xx-large' }}>Add comment</h2>
         <CommentForm
           onSubmit={(comment: CommentEntry) => {
             setComments((previous) => [...previous, comment]);
           }}
         />
 
-        <span style={{ fontSize: 'xx-large' }}>Comments</span>
+        <h2 style={{ fontSize: 'xx-large' }}>Comments</h2>
         <CommentList comments={comments} />
       </div>
     </section>

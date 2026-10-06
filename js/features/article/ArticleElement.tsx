@@ -16,19 +16,19 @@ export function ArticleElement({
   textElements,
 }: ArticleElementProps): ReactElement {
   return (
-    <span style={{ fontSize: 'x-large' }}>
-      <Highlight text={title} />
-      {textElements.map((el, index) => (
-        <div key={index}>
-          <br />
-          <br />
-          {el.imgSource != null ? (
-            <img src={el.imgSource} alt={el.text} />
-          ) : (
+    <section>
+      <h2 style={{ fontSize: 'x-large' }}>
+        <Highlight text={title} />
+      </h2>
+      {textElements.map((el, index) =>
+        el.imgSource != null ? (
+          <img key={index} src={el.imgSource} alt={el.text} />
+        ) : (
+          <p key={index}>
             <Highlight text={el.text} />
-          )}
-        </div>
-      ))}
-    </span>
+          </p>
+        )
+      )}
+    </section>
   );
 }

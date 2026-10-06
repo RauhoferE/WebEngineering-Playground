@@ -1,13 +1,26 @@
 import { type ReactElement } from 'react';
-import { Link } from 'react-router';
+import { Link, NavLink as RouterNavLink } from 'react-router';
 import { type NavLinkProps } from './nav-link-models';
 
-export function NavLink({ links }: { links: NavLinkProps[] }): ReactElement {
+export function NavLink({
+  links,
+  markCurrent = false,
+}: {
+  links: NavLinkProps[];
+  // Router's NavLink sets aria-current="page" on the active link
+  markCurrent?: boolean;
+}): ReactElement {
   return (
     <ul>
-      {links.map((link, index) => (
-        <li key={index}>
-          <Link to={link.href}>{link.name}</Link>
+      {links.map((link) => (
+        <li key={link.name}>
+          {markCurrent ? (
+            <RouterNavLink to={link.href} end>
+              {link.name}
+            </RouterNavLink>
+          ) : (
+            <Link to={link.href}>{link.name}</Link>
+          )}
         </li>
       ))}
     </ul>

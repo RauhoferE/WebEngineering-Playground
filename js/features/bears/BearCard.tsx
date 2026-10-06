@@ -11,7 +11,7 @@ export function BearCard({ bear }: { bear: Bear }): ReactElement {
       <BearImage bear={bear} width="200px" />
       <p>
         <b>
-          <Link to={{ pathname: `/bears/${bear.id}`, search: location.search }}>
+          <Link to={{ pathname: `/bear/${bear.id}`, search: location.search }}>
             <Highlight text={bear.name} />
           </Link>
         </b>{' '}

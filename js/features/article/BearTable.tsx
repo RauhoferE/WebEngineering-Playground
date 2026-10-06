@@ -23,26 +23,27 @@ export function BearTable(): ReactElement {
   ];
   return (
     <table>
+      <caption className="sr-only">Types of bear</caption>
       <thead>
         <tr>
-          <td>
+          <th scope="col">
             <Highlight text="Bear Type" />
-          </td>
-          <td>
+          </th>
+          <th scope="col">
             <Highlight text="Coat" />
-          </td>
-          <td>
+          </th>
+          <th scope="col">
             <Highlight text="Adult size" />
-          </td>
-          <td>
+          </th>
+          <th scope="col">
             <Highlight text="Habitat" />
-          </td>
-          <td>
+          </th>
+          <th scope="col">
             <Highlight text="Lifespan" />
-          </td>
-          <td>
+          </th>
+          <th scope="col">
             <Highlight text="Diet" />
-          </td>
+          </th>
         </tr>
       </thead>
       <tbody>

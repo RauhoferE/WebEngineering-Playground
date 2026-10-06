@@ -11,6 +11,11 @@ export function CommentForm({
   // The state for the comment input field
   const [text, setText] = useState('');
 
+  // Validation message, announced to screen readers via role="alert"
+  const [error, setError] = useState<string | null>(null);
+  // Confirmation message, announced via the always-present status region
+  const [notice, setNotice] = useState('');
+
   // useRef is used for non UI states
   const nextId = useRef(1);
 
@@ -18,7 +23,8 @@ export function CommentForm({
     e.preventDefault();
 
     if (name.trim().length === 0 || text.trim().length === 0) {
-      window.alert("Error: Name and Comment can't be empty");
+      setError("Error: Name and Comment can't be empty");
+      setNotice('');
       return;
     }
 
@@ -30,17 +36,22 @@ export function CommentForm({
     onSubmit({ id, name: trimmedName, text: trimmedText });
     setName('');
     setText('');
+    setError(null);
+    setNotice('Comment added');
   };
 
   return (
-    <form className="comment-form" onSubmit={handleSubmit}>
+    <form className="comment-form" onSubmit={handleSubmit} noValidate>
       <div className="flex-pair">
-        Your name:
+        <label htmlFor="name">Your name:</label>
         <input
           type="text"
           name="name"
           id="name"
+          autoComplete="name"
           placeholder="Enter your name"
+          aria-invalid={error !== null && name.trim().length === 0}
+          aria-describedby={error !== null ? 'comment-error' : undefined}
           value={name}
           onChange={(e) => {
             setName(e.target.value);
@@ -48,18 +59,28 @@ export function CommentForm({
         />
       </div>
       <div className="flex-pair">
-        Your comment:
+        <label htmlFor="comment">Your comment:</label>
         <input
           type="text"
           name="comment"
           id="comment"
           placeholder="Enter your comment"
+          aria-invalid={error !== null && text.trim().length === 0}
+          aria-describedby={error !== null ? 'comment-error' : undefined}
           value={text}
           onChange={(e) => {
             setText(e.target.value);
           }}
         />
       </div>
+      {error !== null && (
+        <p id="comment-error" role="alert" className="form-error">
+          {error}
+        </p>
+      )}
+      <p role="status" className="sr-only">
+        {notice}
+      </p>
       <div>
         <input type="submit" value="Submit comment" />
       </div>

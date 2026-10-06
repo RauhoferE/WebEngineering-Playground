@@ -3,9 +3,11 @@ import { NavLink } from './NavLink';
 
 export function SideBar({ links }: { links: string[] }): ReactElement {
   return (
-    <div className="secondary">
-      <span style={{ fontSize: 'xx-large' }}>Related</span>
+    <section className="secondary" aria-labelledby="related-heading">
+      <h2 id="related-heading" style={{ fontSize: 'xx-large' }}>
+        Related
+      </h2>
       <NavLink links={links.map((link) => ({ href: '#', name: link }))} />
-    </div>
+    </section>
   );
 }

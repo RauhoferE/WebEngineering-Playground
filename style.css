@@ -64,7 +64,7 @@ div[class='nav'],
 article,
 footer,
 .secondary {
-  background-color: green;
+  background-color: #c8e6c9;
 }
 
 article,
@@ -143,6 +143,14 @@ article {
 
 .secondary {
   flex: 2;
+}
+
+.secondary a {
+  color: #0b3d91;
+}
+
+.secondary a:visited {
+  color: #4a1d78;
 }
 
 footer {

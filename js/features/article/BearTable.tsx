@@ -23,7 +23,9 @@ export function BearTable(): ReactElement {
   ];
   return (
     <table>
-      <caption className="sr-only">Types of bear</caption>
+      <caption>
+        <Highlight text="Types of bear compared by coat, adult size, habitat, lifespan and diet. Each row describes one type of bear." />
+      </caption>
       <thead>
         <tr>
           <th scope="col">

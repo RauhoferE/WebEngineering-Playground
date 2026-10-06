@@ -17,9 +17,9 @@ export function BearTableRow({
 }): ReactElement {
   return (
     <tr>
-      <td>
+      <th scope="row">
         <Highlight text={row.type} />
-      </td>
+      </th>
       <td>
         <Highlight text={row.coat} />
       </td>

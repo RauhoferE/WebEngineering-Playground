@@ -2,6 +2,7 @@ import { type ReactElement } from 'react';
 import { Comments } from '../comments/Comments';
 import { BearList } from '../bears/BearList';
 import { Author } from './Author';
+import { AudioWithTranscript } from './AudioWithTranscript';
 import { BearTable } from './BearTable';
 import { ArticleElement, type ArticleElementProps } from './ArticleElement';
 
@@ -70,13 +71,7 @@ export function Article(): ReactElement {
           textElements={el.textElements}
         />
       ))}
-      <audio controls aria-label="Recording of bear sounds">
-        <source src="/media/bear.mp3" type="audio/mp3" />
-        <source src="/media/bear.ogg" type="audio/ogg" />
-        <p>
-          It looks like your browser doesn&apos;t support HTML5 audio players.
-        </p>
-      </audio>
+      <AudioWithTranscript />
       <Author />
 
       <Comments />

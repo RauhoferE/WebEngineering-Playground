@@ -326,3 +326,17 @@ main:focus {
   flex: 2;
   display: flex;
 }
+
+.audio-figure {
+  margin: 1rem 0;
+}
+
+.audio-figure details {
+  width: 500px;
+  margin: 0.5rem auto 0;
+  font-size: 1.6rem;
+}
+
+.audio-figure summary {
+  cursor: pointer;
+}

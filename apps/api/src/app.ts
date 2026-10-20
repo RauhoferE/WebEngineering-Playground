@@ -1,5 +1,7 @@
 import Fastify, { type FastifyInstance } from 'fastify';
 import {
+  jsonSchemaTransform,
+  jsonSchemaTransformObject,
   serializerCompiler,
   validatorCompiler,
 } from '@fastify/type-provider-zod';
@@ -11,6 +13,8 @@ import { bearRoutes } from './routes/bears.js';
 import { commentRoutes } from './routes/comment.js';
 import { CommentService } from './services/comment-service.js';
 import cors from '@fastify/cors';
+import swagger from '@fastify/swagger';
+import swaggerUi from '@fastify/swagger-ui';
 
 export function buildApp(env: Env): FastifyInstance {
   const app = Fastify({
@@ -33,6 +37,16 @@ export function buildApp(env: Env): FastifyInstance {
     credentials: false, // true in unit 3 (sessions)
     maxAge: 600, // browser may cache the preflight for 10 minutes
   });
+
+  void app.register(swagger, {
+    openapi: {
+      openapi: '3.1.0',
+      info: { title: 'Bear API', version: '0.1.0' },
+    },
+    transform: jsonSchemaTransform,
+    transformObject: jsonSchemaTransformObject, // named schemas -> components.schemas
+  });
+  void app.register(swaggerUi, { routePrefix: '/api/docs' });
 
   // Minimal mapping: Task 4 turns this into application/problem+json
   app.setErrorHandler((err, req, reply) => {

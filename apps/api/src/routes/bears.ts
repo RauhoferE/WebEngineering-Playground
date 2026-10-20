@@ -2,6 +2,7 @@ import type { FastifyPluginAsyncZod } from '@fastify/type-provider-zod';
 import { z } from 'zod';
 import { Bear, BearId, BearList } from '../schemas/bear.js';
 import type { BearService } from '../services/bear-service.js';
+import { problemResponse } from '../schemas/problem.js';
 
 export const bearRoutes: FastifyPluginAsyncZod<{ bears: BearService }> = async (
   app,
@@ -9,7 +10,7 @@ export const bearRoutes: FastifyPluginAsyncZod<{ bears: BearService }> = async (
 ) => {
   app.get(
     '/api/bears',
-    { schema: { response: { 200: BearList } } },
+    { schema: { response: { 200: BearList, ...problemResponse } } },
     async () => ({ items: await bears.list() })
   );
 
@@ -18,7 +19,7 @@ export const bearRoutes: FastifyPluginAsyncZod<{ bears: BearService }> = async (
     {
       schema: {
         params: z.object({ id: BearId }),
-        response: { 200: Bear },
+        response: { 200: Bear, ...problemResponse },
       },
     },
     async (req) => await bears.get(req.params.id)

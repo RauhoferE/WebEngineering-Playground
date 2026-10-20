@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { BearId } from '../schemas/bear.js';
 import { Comment, CommentList, NewComment } from '../schemas/comment.js';
 import type { CommentService } from '../services/comment-service.js';
+import { problemResponse } from '../schemas/problem.js';
 
 export const commentRoutes: FastifyPluginAsyncZod<{
   comments: CommentService;
@@ -12,7 +13,7 @@ export const commentRoutes: FastifyPluginAsyncZod<{
     {
       schema: {
         params: z.object({ id: BearId }),
-        response: { 200: CommentList },
+        response: { 200: CommentList, ...problemResponse },
       },
     },
     async (req) => ({ items: await comments.list(req.params.id) })
@@ -24,7 +25,7 @@ export const commentRoutes: FastifyPluginAsyncZod<{
       schema: {
         params: z.object({ id: BearId }),
         body: NewComment,
-        response: { 201: Comment },
+        response: { 201: Comment, ...problemResponse },
       },
     },
     async (req, reply) => {
@@ -38,10 +39,15 @@ export const commentRoutes: FastifyPluginAsyncZod<{
 
   app.delete(
     '/api/comments/:commentId',
-    { schema: { params: z.object({ commentId: z.uuid() }) } },
+    {
+      schema: {
+        params: z.object({ commentId: z.uuid() }),
+        response: { 204: z.null(), ...problemResponse },
+      },
+    },
     async (req, reply) => {
       comments.delete(req.params.commentId);
-      return await reply.code(204).send();
+      return await reply.code(204).send(null);
     }
   );
 };

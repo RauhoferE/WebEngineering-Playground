@@ -49,7 +49,7 @@ async function getJson(
   }
 }
 
-export async function fetchUrsidsWikitext(env: Env): Promise<string> {
+export async function fetchBearsWikitext(env: Env): Promise<string> {
   const body = WikiParse.safeParse(
     await getJson(env, {
       action: 'parse',

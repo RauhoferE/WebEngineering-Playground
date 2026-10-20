@@ -74,7 +74,7 @@ export function Article(): ReactElement {
       <AudioWithTranscript />
       <Author />
 
-      <Comments />
+      <Comments bearId="u-arctos" />
       <BearList />
     </article>
   );

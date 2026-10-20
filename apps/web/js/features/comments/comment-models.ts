@@ -1,5 +1,7 @@
 export interface CommentEntry {
   id: number;
-  name: string;
+  bearId: string;
+  author: string;
+  createdAt: string;
   text: string;
 }

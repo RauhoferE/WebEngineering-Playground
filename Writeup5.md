@@ -26,3 +26,19 @@ The browser also no longer needs origin=* or cross-origin calls, because everyth
 Why is an empty 200 on upstream failure worse than a 502?
 
 An empty 200 claims “it worked, there are no bears”. The client can’t tell an outage apart from an empty result, so the UI shows “No bears found” instead of an error. Caches may store the empty answer. Monitoring counts a success while the app is broken, so the person on call never gets alerted. A 502 or 504 states the truth: the problem is upstream, retry later or show an error state. It also appears in error-rate dashboards (slide 27).
+
+## Task 3
+
+Why do comments survive a reload but not a restart?
+The Map lives in the memory of the API process. A page reload only resets the React state; the frontend then fetches the comments from the API again, and the API still has them. A restart creates a new process with a new, empty Map. Making them last needs persistence, which is Playground 5 with PostgreSQL.
+Safe, idempotent, cacheable (slide 8):
+Safe: the method doesn’t change server state (GET, HEAD, OPTIONS).
+Idempotent: sending the request N times leaves the server in the same state as sending it once (GET, PUT, DELETE).
+Cacheable: a response may be stored and reused (GET and HEAD by default).
+
+
+Why POST for creating? The server picks the id, so the client doesn’t know the new comment’s URI in advance. POST to the collection means “create something in here”, and the answer is 201 with Location pointing to the new URI. PUT would require the client to know the target URI already.
+Why must DELETE be idempotent? If a response gets lost, clients, proxies and libraries may retry it automatically. A second DELETE must not do anything extra; the comment is gone either way. Idempotency is about server state, not the status code, so the second call answers 404 and that’s still correct (slide 8).
+What happens when a client retries a POST? POST isn’t idempotent. If the first request was stored but the response got lost, the retry creates a second comment with a new id: a duplicate (slide 13). Two ways to prevent it:
+The client generates the id and sends PUT /api/comments/{id}, so a retry just overwrites the same comment.
+An Idempotency-Key header: the server remembers the key and returns the first result again on a retry (unit 4).

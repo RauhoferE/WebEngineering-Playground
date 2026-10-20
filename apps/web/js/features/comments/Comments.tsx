@@ -1,19 +1,29 @@
-import { useState, type ReactElement } from 'react';
+import { useEffect, useState, type ReactElement } from 'react';
 import { type CommentEntry } from './comment-models';
 import { CommentForm } from './CommentForm';
 import { CommentList } from './CommentList';
+import { createComment, fetchComments } from './comments.api';
 
-export function Comments(): ReactElement {
+export function Comments({ bearId }: { bearId: string }): ReactElement {
   // The state for the visibility of the comments section
   const [visible, setVisible] = useState(false);
   // The state for the comments
-  const [comments, setComments] = useState<CommentEntry[]>([
-    {
-      id: 0,
-      name: 'Bob Fossil',
-      text: 'Oh I am so glad you taught me all about the big brown angry guys...',
-    },
-  ]);
+  const [comments, setComments] = useState<CommentEntry[]>([]);
+
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    fetchComments(bearId, controller.signal)
+      .then(setComments)
+      .catch(() => {
+        if (controller.signal.aborted) return;
+        setLoadError('Error: Comments could not be loaded');
+      });
+    return () => {
+      controller.abort();
+    };
+  }, [bearId]);
 
   return (
     <section className="comments" aria-label="Comments">
@@ -36,12 +46,14 @@ export function Comments(): ReactElement {
       >
         <h2 style={{ fontSize: 'xx-large' }}>Add comment</h2>
         <CommentForm
-          onSubmit={(comment: CommentEntry) => {
-            setComments((previous) => [...previous, comment]);
+          onSubmit={async (comment) => {
+            const created = await createComment(bearId, comment);
+            setComments((previous) => [...previous, created]);
           }}
         />
 
         <h2 style={{ fontSize: 'xx-large' }}>Comments</h2>
+        {loadError !== null && <p role="alert">{loadError}</p>}
         <CommentList comments={comments} />
       </div>
     </section>

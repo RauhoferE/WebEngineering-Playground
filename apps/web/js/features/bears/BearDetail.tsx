@@ -2,6 +2,7 @@ import { Link, useParams } from 'react-router';
 import { BearImage } from './BearImage';
 import { type ReactElement } from 'react';
 import { useBear } from './useBear';
+import { Comments } from '../comments/Comments';
 
 export function BearDetail(): ReactElement {
   const { bearId } = useParams();
@@ -24,6 +25,7 @@ export function BearDetail(): ReactElement {
         <i>{bear.binomial}</i>
       </p>
       <p>Range: {bear.range}</p>
+      <Comments key={bear.id} bearId={bear.id} />
       <Link to="/">← Back to all bears</Link>
     </article>
   );

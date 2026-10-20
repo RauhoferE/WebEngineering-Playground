@@ -12,7 +12,7 @@ export function CommentList({
       {comments.map((comment) => (
         <li key={comment.id}>
           <p>
-            <Highlight text={comment.name} />
+            <Highlight text={comment.author} />
           </p>
           <p>
             <Highlight text={comment.text} />

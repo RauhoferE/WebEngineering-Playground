@@ -5,7 +5,19 @@ import type { BearService } from './bear-service.js';
 
 export class CommentService {
   // Lives in the API process memory: survives a page reload, not a restart
-  private readonly comments = new Map<string, Comment>();
+  private readonly bobCommentId: string = randomUUID();
+  private readonly comments = new Map<string, Comment>([
+    [
+      this.bobCommentId,
+      {
+        id: randomUUID(),
+        bearId: 'u-arctos',
+        author: 'Bob Fossil',
+        text: 'Oh I am so glad you taught me all about the big brown angry guys...',
+        createdAt: new Date().toISOString(),
+      },
+    ],
+  ]);
 
   constructor(private readonly bears: BearService) {}
 

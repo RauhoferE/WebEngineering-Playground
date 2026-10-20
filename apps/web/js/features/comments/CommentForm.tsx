@@ -1,9 +1,9 @@
-import { type FormEvent, type ReactElement, useRef, useState } from 'react';
+import { type FormEvent, type ReactElement, useState } from 'react';
 
 export function CommentForm({
   onSubmit,
 }: {
-  onSubmit: (comment: { id: number; name: string; text: string }) => void;
+  onSubmit: (comment: { author: string; text: string }) => Promise<void>;
 }): ReactElement {
   // The state for the name input field
   const [name, setName] = useState('');
@@ -15,9 +15,6 @@ export function CommentForm({
   const [error, setError] = useState<string | null>(null);
   // Confirmation message, announced via the always-present status region
   const [notice, setNotice] = useState('');
-
-  // useRef is used for non UI states
-  const nextId = useRef(1);
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
@@ -31,13 +28,17 @@ export function CommentForm({
     const trimmedName = name.trim();
     const trimmedText = text.trim();
 
-    const id = nextId.current;
-    nextId.current += 1;
-    onSubmit({ id, name: trimmedName, text: trimmedText });
-    setName('');
-    setText('');
-    setError(null);
-    setNotice('Comment added');
+    onSubmit({ author: trimmedName, text: trimmedText })
+      .then(() => {
+        setName('');
+        setText('');
+        setError(null);
+        setNotice('Comment added');
+      })
+      .catch(() => {
+        setError('Error: Comment could not be added');
+        setNotice('');
+      });
   };
 
   return (

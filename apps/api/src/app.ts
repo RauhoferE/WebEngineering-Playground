@@ -15,7 +15,7 @@ export function buildApp(env: Env): FastifyInstance {
     requestIdHeader: 'x-request-id',
     genReqId: () => randomUUID(),
   });
-  // For route schemas since they are expected to be JSON but in our case they are zod
+  // For route schemas since fastify expects them to be JSON but in our case they are zod
   // setValidator for inout -> builds validtor function from each routes params
   // setSerializer for putput -> builds validator function from the response schemas
   app.setValidatorCompiler(validatorCompiler);

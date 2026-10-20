@@ -39,7 +39,16 @@ export function problem(
   return { type, title, status, detail, instance: `urn:uuid:${req.id}` };
 }
 
-export function toProblem(err: FastifyError, req: FastifyRequest): Problem {
+function isClientError(err: unknown): err is FastifyError {
+  return (
+    err instanceof Error &&
+    'statusCode' in err &&
+    typeof err.statusCode === 'number' &&
+    err.statusCode < 500
+  );
+}
+
+export function toProblem(err: unknown, req: FastifyRequest): Problem {
   // Our own errors: status comes from the class, never from the message text
   if (err instanceof AppError) {
     return problem(err.status, err.detail, req, err.type, err.title);
@@ -61,8 +70,8 @@ export function toProblem(err: FastifyError, req: FastifyRequest): Problem {
     };
   }
   // Other Fastify client errors: malformed JSON (400), wrong Content-Type (415), ...
-  if (err.statusCode !== undefined && err.statusCode < 500) {
-    return problem(err.statusCode, err.message, req);
+  if (isClientError(err)) {
+    return problem(err.statusCode ?? 400, err.message, req);
   }
   // Anything else: generic detail, no stack trace, the details go to the log
   return problem(

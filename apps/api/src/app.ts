@@ -4,7 +4,7 @@ import {
   validatorCompiler,
 } from '@fastify/type-provider-zod';
 import { randomUUID } from 'node:crypto';
-import { AppError } from './schemas/errors.js';
+import { problem, toProblem } from './schemas/errors.js';
 import type { Env } from './schemas/env.js';
 import { BearService } from './services/bear-service.js';
 import { bearRoutes } from './routes/bears.js';
@@ -25,11 +25,27 @@ export function buildApp(env: Env): FastifyInstance {
 
   // Minimal mapping: Task 4 turns this into application/problem+json
   app.setErrorHandler((err, req, reply) => {
-    if (!(err instanceof AppError)) throw err; // Fastify's default handler
-    if (err.status >= 500) req.log.error({ err }, 'request failed');
-    return reply
-      .code(err.status)
-      .send({ type: err.type, title: err.title, status: err.status });
+    const p = toProblem(err, req);
+    if (p.status >= 500) {
+      req.log.error({ err }, 'request failed');
+    } else {
+      req.log.info({ err }, 'request rejected');
+    }
+    return reply.code(p.status).type('application/problem+json').send(p);
+  });
+
+  app.setNotFoundHandler((req, reply) =>
+    reply
+      .code(404)
+      .type('application/problem+json')
+      .send(problem(404, 'No such route', req))
+  );
+
+  // Every response carries the request id (generated or taken from the client)
+  // Done for error handling and possible logging
+  app.addHook('onSend', (req, reply, payload, done) => {
+    void reply.header('x-request-id', req.id);
+    done(null, payload);
   });
 
   app.get('/health', async () => ({
@@ -37,6 +53,12 @@ export function buildApp(env: Env): FastifyInstance {
     version: process.env.APP_VERSION ?? 'dev',
     uptime: Math.round(process.uptime()),
   }));
+
+  if (process.env.NODE_ENV !== 'production') {
+    app.get('/api/debug/error', async () => {
+      throw new Error('provoked failure');
+    });
+  }
 
   // Assign bear service to const, so we can reuse it in the comment service, which needs to check if a bear exists before adding a comment
   const bears = new BearService(env, app.log);

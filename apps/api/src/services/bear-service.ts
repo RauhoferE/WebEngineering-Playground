@@ -2,7 +2,7 @@ import type { FastifyBaseLogger } from 'fastify';
 import { z } from 'zod';
 import type { Env } from '../schemas/env.js';
 import { Bear } from '../schemas/bear.js';
-import { NotFoundError, UpstreamError } from '../errors.js';
+import { NotFoundError, UpstreamError } from '../schemas/errors.js';
 import { fetchBearsWikitext, fetchImageUrls } from '../upstream/wikipedia.js';
 import { type ParsedBear, parseBears, slugify } from './bear-parser.js';
 

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import type { Env } from '../schemas/env.js';
-import { UpstreamError, UpstreamTimeoutError } from '../errors.js';
+import { UpstreamError, UpstreamTimeoutError } from '../schemas/errors.js';
 
 const WikiParse = z.object({ parse: z.object({ wikitext: z.string() }) });
 

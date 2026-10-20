@@ -1,0 +1,17 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    environment:
+      PORT: '3000'
+      APP_VERSION: '0.1.0'
+    ports: ['3000:3000']
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    ports: ['8080:80']
+    depends_on:
+      api:
+        condition: service_healthy

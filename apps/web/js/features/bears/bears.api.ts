@@ -1,3 +1,4 @@
+import { apiBase } from '../../common/config';
 import { toApiError } from '../../common/problem';
 import { type Bear } from './bear-models';
 
@@ -15,7 +16,9 @@ async function getJson(url: string, signal: AbortSignal): Promise<unknown> {
 
 // Our own BFF validated and shaped the data; the contract is checked in Task 5
 export async function fetchBears(signal: AbortSignal): Promise<Bear[]> {
-  const body = (await getJson('/api/bears', signal)) as { items: Bear[] };
+  const body = (await getJson(`${apiBase}/api/bears`, signal)) as {
+    items: Bear[];
+  };
   return body.items;
 }
 
@@ -24,7 +27,7 @@ export async function fetchBear(
   signal: AbortSignal
 ): Promise<Bear> {
   return (await getJson(
-    `/api/bears/${encodeURIComponent(id)}`,
+    `${apiBase}/api/bears/${encodeURIComponent(id)}`,
     signal
   )) as Bear;
 }

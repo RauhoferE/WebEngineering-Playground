@@ -10,7 +10,8 @@
     "isolatedModules": true, // Transpile files in isolation for ts patterns that dont survive this
     "skipLibCheck": true,
     "noEmit": true, // Vite does the actual transpiling,
-    "jsx": "react-jsx" // Use the new JSX transform
+    "jsx": "react-jsx", // Use the new JSX transform
+    "types": ["vite/client"] // import.meta.env and asset imports
   },
   "include": ["js", "vite.config.ts"]
 }

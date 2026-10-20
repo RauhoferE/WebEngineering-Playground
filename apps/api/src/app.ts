@@ -8,6 +8,8 @@ import { AppError } from './schemas/errors.js';
 import type { Env } from './schemas/env.js';
 import { BearService } from './services/bear-service.js';
 import { bearRoutes } from './routes/bears.js';
+import { commentRoutes } from './routes/comment.js';
+import { CommentService } from './services/comment-service.js';
 
 export function buildApp(env: Env): FastifyInstance {
   const app = Fastify({
@@ -36,9 +38,13 @@ export function buildApp(env: Env): FastifyInstance {
     uptime: Math.round(process.uptime()),
   }));
 
+  // Assign bear service to const, so we can reuse it in the comment service, which needs to check if a bear exists before adding a comment
+  const bears = new BearService(env, app.log);
+
   // void is used here because register returns a promise but we don't need to await it,
   // we just want to register the routes
-  void app.register(bearRoutes, { bears: new BearService(env, app.log) });
+  void app.register(bearRoutes, { bears });
+  void app.register(commentRoutes, { comments: new CommentService(bears) });
 
   return app;
 }

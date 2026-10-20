@@ -4,7 +4,7 @@ env:
   es2021: true
 parser: '@typescript-eslint/parser'
 parserOptions:
-  project: ./tsconfig.json
+  project: true
   ecmaVersion: latest
   sourceType: module
   ecmaFeatures:

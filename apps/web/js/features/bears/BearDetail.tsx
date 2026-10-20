@@ -1,24 +1,20 @@
 import { Link, useParams } from 'react-router';
-import { useBears } from './useBears';
 import { BearImage } from './BearImage';
 import { type ReactElement } from 'react';
+import { useBear } from './useBear';
 
 export function BearDetail(): ReactElement {
   const { bearId } = useParams();
-  const state = useBears();
+  const state = useBear(bearId ?? '');
   if (state.status === 'loading') return <p role="status">Loading bear…</p>;
   if (state.status === 'error') return <p role="alert">{state.message}</p>;
-
-  const bear =
-    state.status === 'success'
-      ? state.bears.find((b) => b.id === bearId)
-      : undefined;
-  if (bear === undefined)
+  if (state.status === 'notFound')
     return (
       <p>
         No bear with the id “{bearId}” exists. <Link to="/">Back to list</Link>
       </p>
     );
+  const { bear } = state;
 
   return (
     <article>

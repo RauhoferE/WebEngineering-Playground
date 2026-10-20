@@ -14,7 +14,9 @@ export function BearImage({
 
   return (
     <img
-      src={imageFailed ? placeholderImage : bear.image}
+      src={
+        imageFailed || bear.imageUrl == null ? placeholderImage : bear.imageUrl
+      }
       alt={`Image of ${bear.name}`}
       style={{ width, height: width }}
       onError={() => {

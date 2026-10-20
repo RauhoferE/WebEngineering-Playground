@@ -10,6 +10,7 @@ import { BearService } from './services/bear-service.js';
 import { bearRoutes } from './routes/bears.js';
 import { commentRoutes } from './routes/comment.js';
 import { CommentService } from './services/comment-service.js';
+import cors from '@fastify/cors';
 
 export function buildApp(env: Env): FastifyInstance {
   const app = Fastify({
@@ -22,6 +23,16 @@ export function buildApp(env: Env): FastifyInstance {
   // setSerializer for putput -> builds validator function from the response schemas
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);
+
+  // Set CORS
+  void app.register(cors, {
+    origin: env.CORS_ORIGINS, // allow-list, never "*" or reflecting every origin
+    methods: ['GET', 'POST', 'DELETE'],
+    allowedHeaders: ['content-type', 'x-request-id'],
+    exposedHeaders: ['location', 'x-request-id'],
+    credentials: false, // true in unit 3 (sessions)
+    maxAge: 600, // browser may cache the preflight for 10 minutes
+  });
 
   // Minimal mapping: Task 4 turns this into application/problem+json
   app.setErrorHandler((err, req, reply) => {

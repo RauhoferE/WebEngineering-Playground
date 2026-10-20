@@ -10,7 +10,17 @@ export const Env = z.object({
       'BearApp/0.1 (https://github.com/RauhoferE/WebEngineering-Playground)'
     ),
   UPSTREAM_TIMEOUT_MS: z.coerce.number().int().positive().default(5000),
+  CORS_ORIGINS: z
+    .string()
+    .default('http://localhost:4173')
+    .transform((value) =>
+      value
+        .split(',')
+        .map((origin) => origin.trim())
+        .filter((origin) => origin !== '')
+    ),
 });
+
 export type Env = z.infer<typeof Env>;
 
 // Fails at startup if the configuration is invalid

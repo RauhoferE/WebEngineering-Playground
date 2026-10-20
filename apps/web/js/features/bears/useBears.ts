@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { type BearsState } from './bear-models';
 import { fetchBears } from './bears.api';
+import { ApiError } from '../../common/problem';
 
 export function useBears(): BearsState {
   const [state, setState] = useState<BearsState>({ status: 'loading' });
@@ -17,12 +18,15 @@ export function useBears(): BearsState {
             : { status: 'success', bears }
         );
       })
-      .catch(() => {
+      .catch((error: unknown) => {
         // SHow no error if fetch was aborted
         if (controller.signal.aborted) return;
         setState({
           status: 'error',
-          message: 'Error: Bears could not be fetched',
+          message:
+            error instanceof ApiError
+              ? `Error: ${error.message}`
+              : 'Error: Bears could not be fetched',
         });
       });
     return () => {

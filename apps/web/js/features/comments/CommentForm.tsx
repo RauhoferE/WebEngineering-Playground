@@ -1,4 +1,5 @@
 import { type FormEvent, type ReactElement, useState } from 'react';
+import { ApiError } from '../../common/problem';
 
 export function CommentForm({
   onSubmit,
@@ -35,8 +36,12 @@ export function CommentForm({
         setError(null);
         setNotice('Comment added');
       })
-      .catch(() => {
-        setError('Error: Comment could not be added');
+      .catch((error: unknown) => {
+        setError(
+          error instanceof ApiError
+            ? `Error: ${error.message}`
+            : 'Error: Comment could not be added'
+        );
         setNotice('');
       });
   };

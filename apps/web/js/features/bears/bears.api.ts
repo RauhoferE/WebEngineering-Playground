@@ -1,16 +1,15 @@
+import { toApiError } from '../../common/problem';
 import { type Bear } from './bear-models';
 
 export const placeholderImage = '/media/placeholder.svg';
-
-export class NotFoundError extends Error {}
 
 async function getJson(url: string, signal: AbortSignal): Promise<unknown> {
   const res = await fetch(url, {
     signal,
     headers: { Accept: 'application/json' },
   });
-  if (res.status === 404) throw new NotFoundError();
-  if (!res.ok) throw new Error(`API request failed with status ${res.status}`);
+  if (res.status === 404) throw await toApiError(res);
+  if (!res.ok) throw await toApiError(res);
   return await res.json();
 }
 

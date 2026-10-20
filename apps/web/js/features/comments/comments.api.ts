@@ -1,3 +1,4 @@
+import { toApiError } from '../../common/problem';
 import { type CommentEntry } from './comment-models';
 
 export async function fetchComments(
@@ -8,7 +9,7 @@ export async function fetchComments(
     signal,
     headers: { Accept: 'application/json' },
   });
-  if (!res.ok) throw new Error(`API request failed with status ${res.status}`);
+  if (!res.ok) throw await toApiError(res);
   const body = (await res.json()) as { items: CommentEntry[] };
   return body.items;
 }
@@ -22,6 +23,6 @@ export async function createComment(
     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
     body: JSON.stringify(comment),
   });
-  if (!res.ok) throw new Error(`API request failed with status ${res.status}`);
+  if (!res.ok) throw await toApiError(res);
   return (await res.json()) as CommentEntry;
 }

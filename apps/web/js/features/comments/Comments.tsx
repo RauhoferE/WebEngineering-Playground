@@ -3,6 +3,7 @@ import { type CommentEntry } from './comment-models';
 import { CommentForm } from './CommentForm';
 import { CommentList } from './CommentList';
 import { createComment, fetchComments } from './comments.api';
+import { ApiError } from '../../common/problem';
 
 export function Comments({ bearId }: { bearId: string }): ReactElement {
   // The state for the visibility of the comments section
@@ -16,9 +17,13 @@ export function Comments({ bearId }: { bearId: string }): ReactElement {
     const controller = new AbortController();
     fetchComments(bearId, controller.signal)
       .then(setComments)
-      .catch(() => {
+      .catch((error: unknown) => {
         if (controller.signal.aborted) return;
-        setLoadError('Error: Comments could not be loaded');
+        setLoadError(
+          error instanceof ApiError
+            ? `Error: ${error.message}`
+            : 'Error: Comments could not be loaded'
+        );
       });
     return () => {
       controller.abort();

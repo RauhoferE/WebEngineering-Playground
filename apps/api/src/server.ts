@@ -1,6 +1,8 @@
 import { buildApp } from './app.js'; // .js is required with NodeNext
+import { loadEnv } from './schemas/env.js';
 
-const app = buildApp();
+const env = loadEnv();
+const app = buildApp(env);
 
 for (const signal of ['SIGINT', 'SIGTERM'] as const) {
   process.on(signal, () => {

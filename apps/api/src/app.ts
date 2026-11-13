@@ -101,7 +101,7 @@ export function buildApp(
 
   app.get('/health/ready', async () => {
     try {
-      await pool.query('SELECT 1');
+      await deps.ping();
     } catch (err) {
       throw new NotReadyError('database ping failed', { cause: err });
     }

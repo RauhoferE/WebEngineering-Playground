@@ -32,3 +32,18 @@ The fix: rebase, delete your unapplied migration, and regenerate it on top of ma
 Natural vs surrogate key:
 Natural key: use one when the value is unique, stable, and known at insert time. The bear slug is the URL and the Wikipedia identity.
 Surrogate key: use one when any of those three is in doubt. Comments have no natural identity, so they get a UUID v7.
+
+## Task 3
+
+What it hides: SQL and Drizzle, table and column names, Date vs ISO-string mapping, ordering, and batching. Services speak the domain (listByBear, delete returning false) instead of select().where(). It’s also the seam that lets tests swap in memory implementations, and would let you replace Drizzle with Prisma without touching routes.
+
+What it costs:
+Every query exists twice: once in the interface, once in each class.
+A repository that just mirrors the ORM (findMany(where)) is “Drizzle with extra steps”, which the slides call leaky.
+In-memory fakes can hide SQL bugs. Your MemoryCommentRepository doesn’t enforce the CHECK lengths or the foreign key, and it orders by insertion, not by created_at, id. Tests pass, but they don’t prove the SQL is right.
+
+N+1: “comments for all bears” written naively is one query for the bears, plus one listByBear per bear inside a loop. With 8 bears that’s 9 round trips; with 100 bears it’s 101, and the latency grows with the data.
+
+How your repository avoids it: listByBears(ids) makes one WHERE bear_id IN (...) query and groups the rows in memory, so it’s always 2 queries no matter how many bears there are. Because the batching lives in the repository, the service can never accidentally loop over queries.
+
+Caveat: IN with thousands of IDs, or bears with unbounded comment counts, need pagination or a LATERAL join with a per-bear limit (slide 29).

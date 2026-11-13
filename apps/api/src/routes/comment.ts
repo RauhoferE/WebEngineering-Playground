@@ -46,7 +46,7 @@ export const commentRoutes: FastifyPluginAsyncZod<{
       },
     },
     async (req, reply) => {
-      comments.delete(req.params.commentId);
+      await comments.delete(req.params.commentId);
       return await reply.code(204).send(null);
     }
   );

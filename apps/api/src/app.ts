@@ -15,13 +15,28 @@ import { CommentService } from './services/comment-service.js';
 import cors from '@fastify/cors';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
+import { createPool } from './db/pool.js';
 
-export function buildApp(env: Env): FastifyInstance {
+export interface AppDeps {
+  createPool: typeof createPool;
+}
+
+export function buildApp(
+  env: Env,
+  deps: AppDeps = { createPool }
+): FastifyInstance {
   const app = Fastify({
     logger: true,
     requestIdHeader: 'x-request-id',
     genReqId: () => randomUUID(),
   });
+
+  // WE register the pool here so we can use the apps pool
+  const pool = deps.createPool(env, app.log);
+  app.addHook('onClose', async () => {
+    await pool.end();
+  });
+
   // For route schemas since fastify expects them to be JSON but in our case they are zod
   // setValidator for inout -> builds validtor function from each routes params
   // setSerializer for putput -> builds validator function from the response schemas

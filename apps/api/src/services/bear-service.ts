@@ -1,58 +1,37 @@
-import type { FastifyBaseLogger } from 'fastify';
-import { z } from 'zod';
-import type { Env } from '../schemas/env.js';
-import { Bear } from '../schemas/bear.js';
-import { NotFoundError, UpstreamError } from '../schemas/errors.js';
-import { fetchBearsWikitext, fetchImageUrls } from '../upstream/wikipedia.js';
-import { type ParsedBear, parseBears, slugify } from './bear-parser.js';
+import { asc, eq } from 'drizzle-orm';
+import type { Db } from '../db/client.js';
+import { bears } from '../db/schema.js';
+import { type Bear } from '../schemas/bear.js';
+import { NotFoundError } from '../schemas/errors.js';
 
 export class BearService {
-  constructor(
-    private readonly env: Env,
-    private readonly log: FastifyBaseLogger
-  ) {}
+  constructor(private readonly db: Db) {}
 
   async list(): Promise<Bear[]> {
-    const parsed = parseBears(await fetchBearsWikitext(this.env));
-    // Zero bears means the page changed: an upstream problem, never an empty 200
-    if (parsed.length === 0) {
-      throw new UpstreamError('no bears found in wikitext');
-    }
-
-    const images = await this.imageUrls(parsed);
-    const result = z.array(Bear).safeParse(
-      parsed.map((b) => ({
-        id: slugify(b.binomial),
-        name: b.name,
-        binomial: b.binomial,
-        range: b.range,
-        imageUrl: b.fileName === null ? null : (images.get(b.fileName) ?? null),
-      }))
-    );
-    if (!result.success) {
-      throw new UpstreamError('parsed bears are invalid', {
-        cause: result.error,
-      });
-    }
-    return result.data;
+    const rows = await this.db
+      .select()
+      .from(bears)
+      .orderBy(asc(bears.position));
+    return rows.map(toBear);
   }
 
   async get(id: string): Promise<Bear> {
-    const bear = (await this.list()).find((b) => b.id === id);
-    if (bear === undefined) throw new NotFoundError(`No bear with id "${id}"`);
-    return bear;
+    const [row] = await this.db
+      .select()
+      .from(bears)
+      .where(eq(bears.id, id))
+      .limit(1);
+    if (row === undefined) throw new NotFoundError(`No bear with id "${id}"`);
+    return toBear(row);
   }
+}
 
-  // Images are optional: if they fail, the bears are still shown with a placeholder
-  private async imageUrls(bears: ParsedBear[]): Promise<Map<string, string>> {
-    try {
-      return await fetchImageUrls(
-        this.env,
-        bears.flatMap((b) => (b.fileName === null ? [] : [b.fileName]))
-      );
-    } catch (err) {
-      this.log.warn({ err }, 'image lookup failed, continuing without images');
-      return new Map();
-    }
-  }
+function toBear(row: typeof bears.$inferSelect): Bear {
+  return {
+    id: row.id,
+    name: row.name,
+    binomial: row.binomial,
+    imageUrl: row.imageUrl,
+    range: row.range,
+  };
 }

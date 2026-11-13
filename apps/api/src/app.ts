@@ -37,7 +37,7 @@ export function buildApp(
   app.addHook('onClose', async () => {
     await pool.end();
   });
-  createDb(pool);
+  const db = createDb(pool);
 
   // For route schemas since fastify expects them to be JSON but in our case they are zod
   // setValidator for inout -> builds validtor function from each routes params
@@ -112,7 +112,7 @@ export function buildApp(
   }
 
   // Assign bear service to const, so we can reuse it in the comment service, which needs to check if a bear exists before adding a comment
-  const bears = new BearService(env, app.log);
+  const bears = new BearService(db);
 
   // void is used here because register returns a promise but we don't need to await it,
   // we just want to register the routes

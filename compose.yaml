@@ -1,4 +1,19 @@
 services:
+  db:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-bears}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-bears}
+      POSTGRES_DB: ${POSTGRES_DB:-bears}
+    volumes:
+      - pgdata:/var/lib/postgresql
+    ports: ['5432:5432']
+    healthcheck:
+      test:
+        ['CMD-SHELL', 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+      interval: 5s
+      timeout: 3s
+      retries: 10
   api:
     build:
       context: .
@@ -10,6 +25,10 @@ services:
       USER_AGENT: 'BearApp/0.1 (https://github.com/RauhoferE/WebEngineering-Playground)'
       UPSTREAM_TIMEOUT_MS: '5000'
       CORS_ORIGINS: http://localhost:4173
+      DATABASE_URL: postgres://${POSTGRES_USER:-bears}:${POSTGRES_PASSWORD:-bears}@db:5432/${POSTGRES_DB:-bears}
+    depends_on:
+      db:
+        condition: service_healthy
     ports: ['3000:3000']
   web:
     build:
@@ -19,3 +38,5 @@ services:
     depends_on:
       api:
         condition: service_healthy
+volumes:
+  pgdata:

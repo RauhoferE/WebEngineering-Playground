@@ -1,4 +1,4 @@
-import Fastify, { type FastifyInstance } from 'fastify';
+import Fastify, { type FastifyBaseLogger, type FastifyInstance } from 'fastify';
 import {
   jsonSchemaTransform,
   jsonSchemaTransformObject,
@@ -15,16 +15,20 @@ import { CommentService } from './services/comment-service.js';
 import cors from '@fastify/cors';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
-import { createPool } from './db/pool.js';
-import { createDb } from './db/client.js';
+import { type Repos } from './repositories/repos.js';
+import { createPostgresDeps } from './db/postgres-deps.js';
 
 export interface AppDeps {
-  createPool: typeof createPool;
+  repos: Repos;
+  ping: () => Promise<void>; // used by /health/ready
+  close: () => Promise<void>; // runs in onClose
 }
+
+export type CreateDeps = (env: Env, log: FastifyBaseLogger) => AppDeps;
 
 export function buildApp(
   env: Env,
-  deps: AppDeps = { createPool }
+  createDeps: CreateDeps = createPostgresDeps
 ): FastifyInstance {
   const app = Fastify({
     logger: true,
@@ -32,12 +36,10 @@ export function buildApp(
     genReqId: () => randomUUID(),
   });
 
-  // WE register the pool here so we can use the apps pool
-  const pool = deps.createPool(env, app.log);
+  const deps = createDeps(env, app.log);
   app.addHook('onClose', async () => {
-    await pool.end();
+    await deps.close();
   });
-  const db = createDb(pool);
 
   // For route schemas since fastify expects them to be JSON but in our case they are zod
   // setValidator for inout -> builds validtor function from each routes params
@@ -112,12 +114,11 @@ export function buildApp(
   }
 
   // Assign bear service to const, so we can reuse it in the comment service, which needs to check if a bear exists before adding a comment
-  const bears = new BearService(db);
-
-  // void is used here because register returns a promise but we don't need to await it,
-  // we just want to register the routes
+  const bears = new BearService(deps.repos.bears);
   void app.register(bearRoutes, { bears });
-  void app.register(commentRoutes, { comments: new CommentService(bears) });
+  void app.register(commentRoutes, {
+    comments: new CommentService(deps.repos.comments, bears),
+  });
 
   return app;
 }

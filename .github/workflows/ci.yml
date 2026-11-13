@@ -14,6 +14,8 @@ jobs:
         with:
           node-version: 24
           cache: npm
+      # Run tests
+      - run: npm test
       # Install strictly from package-lock.json
       - run: npm ci
       # Typecheck without emmiting files

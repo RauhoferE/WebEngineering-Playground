@@ -28,6 +28,7 @@ export type CreateDeps = (env: Env, log: FastifyBaseLogger) => AppDeps;
 
 export function buildApp(
   env: Env,
+  // Use per default non memory implementation
   createDeps: CreateDeps = createPostgresDeps
 ): FastifyInstance {
   const app = Fastify({

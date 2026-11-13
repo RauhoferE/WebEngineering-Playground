@@ -4,3 +4,5 @@ package-lock.json
 
 # Documentation / write-ups are not formatted
 *.md
+
+apps/api/drizzle

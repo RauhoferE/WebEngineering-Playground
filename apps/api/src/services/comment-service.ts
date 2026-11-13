@@ -6,7 +6,7 @@ import {
 import { InvalidCursorError, NotFoundError } from '../schemas/errors.js';
 import type { BearService } from './bear-service.js';
 import type { CommentRepository } from '../repositories/comment-repository.js';
-import { decodeCursor } from '../schemas/cursor.js';
+import { decodeCursor, encodeCursor } from '../schemas/cursor.js';
 
 export class CommentService {
   constructor(

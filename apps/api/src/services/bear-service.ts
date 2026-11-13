@@ -5,8 +5,8 @@ import type { BearRepository } from '../repositories/bear-repository.js';
 export class BearService {
   constructor(private readonly bears: BearRepository) {}
 
-  async list(): Promise<Bear[]> {
-    return await this.bears.list();
+  async list(query: { q: string | undefined }): Promise<Bear[]> {
+    return await this.bears.list(query);
   }
 
   async get(id: string): Promise<Bear> {

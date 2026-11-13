@@ -4,8 +4,10 @@ import type { BearRepository } from '../bear-repository.js';
 export class MemoryBearRepository implements BearRepository {
   constructor(private readonly bears: Bear[]) {}
 
-  async list(): Promise<Bear[]> {
-    return [...this.bears];
+  async list({ q }: { q?: string }): Promise<Bear[]> {
+    return this.bears.filter(
+      (b) => q === undefined || b.name.toLowerCase().includes(q.toLowerCase())
+    );
   }
 
   async findById(id: string): Promise<Bear | null> {

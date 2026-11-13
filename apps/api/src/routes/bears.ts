@@ -10,8 +10,20 @@ export const bearRoutes: FastifyPluginAsyncZod<{ bears: BearService }> = async (
 ) => {
   app.get(
     '/api/bears',
-    { schema: { response: { 200: BearList, ...problemResponse } } },
-    async () => ({ items: await bears.list() })
+    {
+      schema: {
+        querystring: z.object({
+          q: z
+            .string()
+            .trim()
+            .max(50)
+            .optional()
+            .transform((v) => (v === '' ? undefined : v)),
+        }),
+        response: { 200: BearList, ...problemResponse },
+      },
+    },
+    async (req) => ({ items: await bears.list(req.query) })
   );
 
   app.get(

@@ -4,12 +4,18 @@ import { test, type TestContext } from 'node:test';
 import type { LightMyRequestResponse } from 'fastify';
 import { buildApp, type AppDeps } from '../app.js';
 import { Env } from '../schemas/env.js';
-import { Comment, CommentList } from '../schemas/comment.js';
+import { Comment, CommentPage } from '../schemas/comment.js';
 import { Problem } from '../schemas/problem.js';
 import { MemoryBearRepository } from '../repositories/memory/bear-repository.js';
 import { MemoryCommentRepository } from '../repositories/memory/comment-repository.js';
 
 const env = Env.parse({ DATABASE_URL: 'postgres://unused@localhost/unused' });
+
+// Each comment is one second newer than the previous one, so the order is deterministic
+function steppingClock(): () => Date {
+  let tick = 0;
+  return () => new Date(Date.UTC(2026, 0, 1, 0, 0, tick++));
+}
 
 function testDeps(): AppDeps {
   return {
@@ -30,7 +36,7 @@ function testDeps(): AppDeps {
           range: 'Arctic',
         },
       ]),
-      comments: new MemoryCommentRepository(),
+      comments: new MemoryCommentRepository(steppingClock()),
     },
     ping: async () => {},
     close: async () => {},
@@ -56,6 +62,29 @@ async function postComment(
     url: `/api/bears/${bearId}/comments`,
     payload: payload as Record<string, unknown>,
   });
+}
+
+async function getPage(
+  app: ReturnType<typeof buildApp>,
+  bearId: string,
+  query: Record<string, string>
+): Promise<CommentPage> {
+  const res = await app.inject({
+    method: 'GET',
+    url: `/api/bears/${bearId}/comments`,
+    query,
+  });
+  assert.equal(res.statusCode, 200);
+  return CommentPage.parse(res.json());
+}
+
+async function createComments(
+  app: ReturnType<typeof buildApp>,
+  texts: string[]
+): Promise<void> {
+  for (const text of texts) {
+    await postComment(app, 'u-arctos', { author: 'Lena', text });
+  }
 }
 
 function assertProblem(res: LightMyRequestResponse, status: number): Problem {
@@ -108,11 +137,12 @@ await test('GET lists only the comments of the requested bear', async (t) => {
   });
 
   assert.equal(res.statusCode, 200);
-  const { items } = CommentList.parse(res.json());
+  const { items, nextCursor } = CommentPage.parse(res.json());
   assert.deepEqual(
     items.map((c) => c.text),
-    ['first', 'second']
+    ['second', 'first']
   );
+  assert.equal(nextCursor, null);
 });
 
 await test('GET returns an empty list for a bear without comments', async (t) => {
@@ -124,7 +154,7 @@ await test('GET returns an empty list for a bear without comments', async (t) =>
   });
 
   assert.equal(res.statusCode, 200);
-  assert.deepEqual(CommentList.parse(res.json()).items, []);
+  assert.deepEqual(CommentPage.parse(res.json()).items, []);
 });
 
 await test('POST rejects text that is empty after trimming', async (t) => {
@@ -204,7 +234,7 @@ await test('DELETE removes a comment, a second DELETE is 404', async (t) => {
     method: 'GET',
     url: '/api/bears/u-arctos/comments',
   });
-  assert.deepEqual(CommentList.parse(list.json()).items, []);
+  assert.deepEqual(CommentPage.parse(list.json()).items, []);
 
   const second = await app.inject({
     method: 'DELETE',
@@ -234,4 +264,100 @@ await test('DELETE with an id that is not a UUID is 400', async (t) => {
 
   const problem = assertProblem(res, 400);
   assert.equal(problem.errors?.[0]?.path, 'commentId');
+});
+
+await test('following nextCursor walks all comments newest first', async (t) => {
+  const app = setup(t);
+  await createComments(app, ['1', '2', '3', '4', '5']);
+
+  const pages: string[][] = [];
+  let cursor: string | null = null;
+  do {
+    const query: Record<string, string> = { limit: '2' };
+    if (cursor !== null) query.cursor = cursor;
+    const page = await getPage(app, 'u-arctos', query);
+    pages.push(page.items.map((c) => c.text));
+    cursor = page.nextCursor;
+  } while (cursor !== null);
+
+  assert.deepEqual(pages, [['5', '4'], ['3', '2'], ['1']]);
+});
+
+await test('a page that ends exactly at the last comment has no nextCursor', async (t) => {
+  const app = setup(t);
+  await createComments(app, ['1', '2']);
+
+  const page = await getPage(app, 'u-arctos', { limit: '2' });
+
+  assert.equal(page.items.length, 2);
+  assert.equal(page.nextCursor, null);
+});
+
+await test('without a limit a page has 20 comments', async (t) => {
+  const app = setup(t);
+  await createComments(
+    app,
+    Array.from({ length: 21 }, (_, i) => `comment ${i + 1}`)
+  );
+
+  const page = await getPage(app, 'u-arctos', {});
+
+  assert.equal(page.items.length, 20);
+  assert.notEqual(page.nextCursor, null);
+});
+
+await test('a cursor is stable when new comments arrive between pages', async (t) => {
+  const app = setup(t);
+  await createComments(app, ['1', '2', '3', '4']);
+
+  const first = await getPage(app, 'u-arctos', { limit: '2' });
+  assert.ok(first.nextCursor !== null);
+  await createComments(app, ['new']);
+  const second = await getPage(app, 'u-arctos', {
+    limit: '2',
+    cursor: first.nextCursor,
+  });
+
+  // With OFFSET 2, "new" would shift everything and "3" would show up twice
+  assert.deepEqual(
+    first.items.map((c) => c.text),
+    ['4', '3']
+  );
+  assert.deepEqual(
+    second.items.map((c) => c.text),
+    ['2', '1']
+  );
+});
+
+await test('a malformed cursor is rejected with 400', async (t) => {
+  const app = setup(t);
+
+  for (const cursor of [
+    'garbage',
+    Buffer.from('{"createdAt":"yesterday","id":"x"}').toString('base64url'),
+  ]) {
+    const res = await app.inject({
+      method: 'GET',
+      url: '/api/bears/u-arctos/comments',
+      query: { cursor },
+    });
+
+    const problem = assertProblem(res, 400);
+    assert.match(problem.type, /\/invalid-cursor$/);
+  }
+});
+
+await test('a limit outside 1 to 100 is rejected with 400', async (t) => {
+  const app = setup(t);
+
+  for (const limit of ['0', '101', 'abc']) {
+    const res = await app.inject({
+      method: 'GET',
+      url: '/api/bears/u-arctos/comments',
+      query: { limit },
+    });
+
+    const problem = assertProblem(res, 400);
+    assert.equal(problem.errors?.[0]?.path, 'limit', `limit=${limit}`);
+  }
 });

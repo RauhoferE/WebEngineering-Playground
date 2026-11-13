@@ -9,6 +9,8 @@ import type {
 export class MemoryCommentRepository implements CommentRepository {
   private readonly comments = new Map<string, Comment>();
 
+  constructor(private readonly now: () => Date = () => new Date()) {}
+
   async listByBear(
     bearId: string,
     { limit, after }: PageRequest
@@ -42,7 +44,7 @@ export class MemoryCommentRepository implements CommentRepository {
       id: randomUUID(),
       bearId,
       ...input,
-      createdAt: new Date().toISOString(),
+      createdAt: this.now().toISOString(),
     };
     this.comments.set(comment.id, comment);
     return comment;

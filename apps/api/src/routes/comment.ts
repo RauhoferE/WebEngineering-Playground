@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { BearId } from '../schemas/bear.js';
 import {
   Comment,
-  CommentList,
+  CommentPage,
   CommentPageQuery,
   NewComment,
 } from '../schemas/comment.js';
@@ -19,7 +19,7 @@ export const commentRoutes: FastifyPluginAsyncZod<{
       schema: {
         params: z.object({ id: BearId }),
         querystring: CommentPageQuery,
-        response: { 200: CommentList, ...problemResponse },
+        response: { 200: CommentPage, ...problemResponse },
       },
     },
     async (req) => await comments.list(req.params.id, req.query)

@@ -16,3 +16,13 @@ export type Comment = z.infer<typeof Comment>;
 
 // Same envelope as BearList
 export const CommentList = z.object({ items: z.array(Comment) });
+
+export const CommentPage = CommentList.extend({
+  nextCursor: z.string().nullable(),
+});
+export type CommentPage = z.infer<typeof CommentPage>;
+
+export const CommentPageQuery = z.object({
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+  cursor: z.string().max(200).optional(),
+});

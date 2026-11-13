@@ -89,3 +89,11 @@ export class NotReadyError extends AppError {
   readonly title = 'Service not ready';
   readonly detail = 'The database is not reachable.';
 }
+
+export class InvalidCursorError extends AppError {
+  readonly status = 400;
+  readonly type = `${P}/invalid-cursor`;
+  readonly title = 'Invalid cursor';
+  readonly detail =
+    'The cursor is malformed. Use the nextCursor from a previous page.';
+}

@@ -1,7 +1,12 @@
-import { type Comment, type NewComment } from '../schemas/comment.js';
-import { NotFoundError } from '../schemas/errors.js';
+import {
+  type CommentPage,
+  type Comment,
+  type NewComment,
+} from '../schemas/comment.js';
+import { InvalidCursorError, NotFoundError } from '../schemas/errors.js';
 import type { BearService } from './bear-service.js';
 import type { CommentRepository } from '../repositories/comment-repository.js';
+import { decodeCursor } from '../schemas/cursor.js';
 
 export class CommentService {
   constructor(
@@ -9,9 +14,25 @@ export class CommentService {
     private readonly bears: BearService
   ) {}
 
-  async list(bearId: string): Promise<Comment[]> {
+  async list(
+    bearId: string,
+    query: { limit: number; cursor?: string }
+  ): Promise<CommentPage> {
     await this.bears.get(bearId);
-    return await this.comments.listByBear(bearId);
+    const after =
+      query.cursor === undefined ? null : decodeCursor(query.cursor);
+    if (after === null && query.cursor !== undefined)
+      throw new InvalidCursorError('bad cursor');
+
+    const { items, hasMore } = await this.comments.listByBear(bearId, {
+      limit: query.limit,
+      after,
+    });
+    const last = items.at(-1);
+    return {
+      items,
+      nextCursor: hasMore && last !== undefined ? encodeCursor(last) : null,
+    };
   }
 
   async create(bearId: string, input: NewComment): Promise<Comment> {

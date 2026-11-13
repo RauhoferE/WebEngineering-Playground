@@ -1,7 +1,12 @@
 import type { FastifyPluginAsyncZod } from '@fastify/type-provider-zod';
 import { z } from 'zod';
 import { BearId } from '../schemas/bear.js';
-import { Comment, CommentList, NewComment } from '../schemas/comment.js';
+import {
+  Comment,
+  CommentList,
+  CommentPageQuery,
+  NewComment,
+} from '../schemas/comment.js';
 import type { CommentService } from '../services/comment-service.js';
 import { problemResponse } from '../schemas/problem.js';
 
@@ -13,10 +18,11 @@ export const commentRoutes: FastifyPluginAsyncZod<{
     {
       schema: {
         params: z.object({ id: BearId }),
+        querystring: CommentPageQuery,
         response: { 200: CommentList, ...problemResponse },
       },
     },
-    async (req) => ({ items: await comments.list(req.params.id) })
+    async (req) => await comments.list(req.params.id, req.query)
   );
 
   app.post(

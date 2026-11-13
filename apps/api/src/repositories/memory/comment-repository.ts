@@ -1,12 +1,34 @@
 import { randomUUID } from 'crypto';
 import type { Comment, NewComment } from '../../schemas/comment.js';
-import type { CommentRepository } from '../comment-repository.js';
+import type {
+  CommentRepository,
+  PageRequest,
+  PageResult,
+} from '../comment-repository.js';
 
 export class MemoryCommentRepository implements CommentRepository {
   private readonly comments = new Map<string, Comment>();
 
-  async listByBear(bearId: string): Promise<Comment[]> {
-    return [...this.comments.values()].filter((c) => c.bearId === bearId);
+  async listByBear(
+    bearId: string,
+    { limit, after }: PageRequest
+  ): Promise<PageResult> {
+    // Same < as isBefore, so sorting and the cursor filter agree; ids are unique
+    const newestFirst = (a: Comment, b: Comment): number => {
+      if (a.createdAt !== b.createdAt)
+        return a.createdAt < b.createdAt ? 1 : -1;
+      return a.id < b.id ? 1 : -1;
+    };
+    const isBefore = (c: Comment): boolean =>
+      after === null ||
+      c.createdAt < after.createdAt ||
+      (c.createdAt === after.createdAt && c.id < after.id);
+
+    const rows = [...this.comments.values()]
+      .filter((c) => c.bearId === bearId && isBefore(c))
+      .sort(newestFirst)
+      .slice(0, limit + 1);
+    return { items: rows.slice(0, limit), hasMore: rows.length > limit };
   }
 
   async listByBears(bearIds: string[]): Promise<Map<string, Comment[]>> {

@@ -1,5 +1,9 @@
-import { asc, eq, inArray } from 'drizzle-orm';
-import type { CommentRepository } from '../comment-repository.js';
+import { and, asc, desc, eq, inArray, sql } from 'drizzle-orm';
+import type {
+  CommentRepository,
+  PageRequest,
+  PageResult,
+} from '../comment-repository.js';
 import type { Comment, NewComment } from '../../schemas/comment.js';
 import type { Db } from '../../db/client.js';
 import { comments } from '../../db/schema.js';
@@ -7,13 +11,27 @@ import { comments } from '../../db/schema.js';
 export class DrizzleCommentRepository implements CommentRepository {
   constructor(private readonly db: Db) {}
 
-  async listByBear(bearId: string): Promise<Comment[]> {
+  async listByBear(
+    bearId: string,
+    { limit, after }: PageRequest
+  ): Promise<PageResult> {
     const rows = await this.db
       .select()
       .from(comments)
-      .where(eq(comments.bearId, bearId))
-      .orderBy(asc(comments.createdAt), asc(comments.id));
-    return rows.map(toComment);
+      .where(
+        and(
+          eq(comments.bearId, bearId),
+          after === null
+            ? undefined
+            : sql`(${comments.createdAt}, ${comments.id}) < (${after.createdAt}::timestamptz, ${after.id}::uuid)`
+        )
+      )
+      .orderBy(desc(comments.createdAt), asc(comments.id))
+      .limit(limit + 1);
+    return {
+      items: rows.slice(0, limit).map(toComment),
+      hasMore: rows.length > limit,
+    };
   }
 
   async listByBears(bearIds: string[]): Promise<Map<string, Comment[]>> {

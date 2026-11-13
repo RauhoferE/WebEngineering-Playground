@@ -6,7 +6,7 @@ import {
   validatorCompiler,
 } from '@fastify/type-provider-zod';
 import { randomUUID } from 'node:crypto';
-import { problem, toProblem } from './schemas/errors.js';
+import { NotReadyError, problem, toProblem } from './schemas/errors.js';
 import type { Env } from './schemas/env.js';
 import { BearService } from './services/bear-service.js';
 import { bearRoutes } from './routes/bears.js';
@@ -93,6 +93,15 @@ export function buildApp(
     version: process.env.APP_VERSION ?? 'dev',
     uptime: Math.round(process.uptime()),
   }));
+
+  app.get('/health/ready', async () => {
+    try {
+      await pool.query('SELECT 1');
+    } catch (err) {
+      throw new NotReadyError('database ping failed', { cause: err });
+    }
+    return { status: 'ready' };
+  });
 
   if (process.env.NODE_ENV !== 'production') {
     app.get('/api/debug/error', async () => {

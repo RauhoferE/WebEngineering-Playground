@@ -82,3 +82,10 @@ export function toProblem(err: unknown, req: FastifyRequest): Problem {
     'Internal server error'
   );
 }
+
+export class NotReadyError extends AppError {
+  readonly status = 503;
+  readonly type = `${P}/not-ready`;
+  readonly title = 'Service not ready';
+  readonly detail = 'The database is not reachable.';
+}

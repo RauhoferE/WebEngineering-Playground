@@ -14,6 +14,8 @@ extends:
 ignorePatterns:
   - dist
   - node_modules
+  # drizzle-kit tooling config, outside tsconfig's "src" and never part of the build
+  - drizzle.config.ts
 rules:
   # const Bear (zod schema) + type Bear is intentional; tsc catches real redeclarations
   '@typescript-eslint/no-redeclare': off

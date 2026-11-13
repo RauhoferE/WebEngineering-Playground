@@ -1,45 +1,26 @@
-import { randomUUID } from 'node:crypto';
 import { type Comment, type NewComment } from '../schemas/comment.js';
 import { NotFoundError } from '../schemas/errors.js';
 import type { BearService } from './bear-service.js';
+import type { CommentRepository } from '../repositories/comment-repository.js';
 
 export class CommentService {
-  // Lives in the API process memory: survives a page reload, not a restart
-  private readonly bobCommentId: string = randomUUID();
-  private readonly comments = new Map<string, Comment>([
-    [
-      this.bobCommentId,
-      {
-        id: randomUUID(),
-        bearId: 'u-arctos',
-        author: 'Bob Fossil',
-        text: 'Oh I am so glad you taught me all about the big brown angry guys...',
-        createdAt: new Date().toISOString(),
-      },
-    ],
-  ]);
-
-  constructor(private readonly bears: BearService) {}
+  constructor(
+    private readonly comments: CommentRepository,
+    private readonly bears: BearService
+  ) {}
 
   async list(bearId: string): Promise<Comment[]> {
-    await this.bears.get(bearId); // 404 for unknown bears
-    return [...this.comments.values()].filter((c) => c.bearId === bearId);
+    await this.bears.get(bearId);
+    return await this.comments.listByBear(bearId);
   }
 
   async create(bearId: string, input: NewComment): Promise<Comment> {
     await this.bears.get(bearId); // 404 for unknown bears
-    const comment: Comment = {
-      id: randomUUID(),
-      bearId,
-      ...input,
-      createdAt: new Date().toISOString(),
-    };
-    this.comments.set(comment.id, comment);
-    return comment;
+    return await this.comments.create(bearId, input);
   }
 
-  delete(id: string): void {
-    if (!this.comments.delete(id)) {
+  async delete(id: string): Promise<void> {
+    if (!(await this.comments.delete(id))) {
       throw new NotFoundError(`No comment with id "${id}"`);
     }
   }

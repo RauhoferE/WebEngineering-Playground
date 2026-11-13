@@ -1,4 +1,14 @@
 services:
+  migrate:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    command: ['node', 'apps/api/dist/scripts/migrate.js']
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-bears}:${POSTGRES_PASSWORD:-bears}@db:5432/${POSTGRES_DB:-bears}
+    depends_on:
+      db:
+        condition: service_healthy
   db:
     image: postgres:18
     environment:
@@ -29,6 +39,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     ports: ['3000:3000']
   web:
     build:

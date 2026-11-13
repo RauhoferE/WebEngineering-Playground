@@ -15,6 +15,7 @@ COPY apps/api/package.json apps/api/
 COPY apps/web/package.json apps/web/
 RUN npm ci -w apps/api --ignore-scripts
 COPY --from=build /app/apps/api/dist apps/api/dist
+COPY apps/api/drizzle apps/api/drizzle
 USER node
 EXPOSE 3000
 HEALTHCHECK --interval=10s --timeout=3s \

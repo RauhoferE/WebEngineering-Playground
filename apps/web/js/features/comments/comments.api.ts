@@ -1,21 +1,23 @@
 import { apiBase } from '../../common/config';
 import { toApiError } from '../../common/problem';
-import { type CommentEntry } from './comment-models';
+import { type CommentPage, type CommentEntry } from './comment-models';
 
 export async function fetchComments(
   bearId: string,
-  signal: AbortSignal
-): Promise<CommentEntry[]> {
+  cursor: string | null,
+  signal?: AbortSignal
+): Promise<CommentPage> {
+  const params = new URLSearchParams({ limit: '10' });
+  if (cursor !== null) params.set('cursor', cursor);
   const res = await fetch(
-    `${apiBase}/api/bears/${encodeURIComponent(bearId)}/comments`,
+    `${apiBase}/api/bears/${encodeURIComponent(bearId)}/comments?${params.toString()}`,
     {
       signal,
       headers: { Accept: 'application/json' },
     }
   );
   if (!res.ok) throw await toApiError(res);
-  const body = (await res.json()) as { items: CommentEntry[] };
-  return body.items;
+  return (await res.json()) as CommentPage;
 }
 
 export async function createComment(

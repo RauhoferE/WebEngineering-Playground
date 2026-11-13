@@ -19,6 +19,8 @@ export const Env = z.object({
         .map((origin) => origin.trim())
         .filter((origin) => origin !== '')
     ),
+  DATABASE_URL: z.url({ protocol: /^postgres(ql)?$/ }),
+  DB_POOL_MAX: z.coerce.number().int().positive().default(10),
 });
 
 export type Env = z.infer<typeof Env>;

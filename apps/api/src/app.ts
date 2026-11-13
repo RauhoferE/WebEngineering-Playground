@@ -16,6 +16,7 @@ import cors from '@fastify/cors';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import { createPool } from './db/pool.js';
+import { createDb } from './db/client.js';
 
 export interface AppDeps {
   createPool: typeof createPool;
@@ -36,6 +37,7 @@ export function buildApp(
   app.addHook('onClose', async () => {
     await pool.end();
   });
+  createDb(pool);
 
   // For route schemas since fastify expects them to be JSON but in our case they are zod
   // setValidator for inout -> builds validtor function from each routes params

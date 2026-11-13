@@ -33,7 +33,7 @@ export const comments = pgTable(
       .references(() => bears.id, { onDelete: 'cascade' }),
     author: text('author').notNull(),
     text: text('text').notNull(),
-    createdAt: timestamp('created_at', { withTimezone: true })
+    createdAt: timestamp('created_at', { withTimezone: true, precision: 3 }) // Used because js can at most use milliseconds
       .notNull()
       .defaultNow(),
   },

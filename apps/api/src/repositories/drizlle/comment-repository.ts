@@ -26,7 +26,7 @@ export class DrizzleCommentRepository implements CommentRepository {
             : sql`(${comments.createdAt}, ${comments.id}) < (${after.createdAt}::timestamptz, ${after.id}::uuid)`
         )
       )
-      .orderBy(desc(comments.createdAt), asc(comments.id))
+      .orderBy(desc(comments.createdAt), desc(comments.id))
       .limit(limit + 1);
     return {
       items: rows.slice(0, limit).map(toComment),

@@ -252,6 +252,25 @@ You might have noticed that the base project has a number of accessibility issue
   - **Comment Section**: The show/hide comment control button is not currently keyboard-accessible. Can you make it keyboard accessible, both in terms of focusing it using the tab key, and activating it using the return key?
   - **The table**: The data table is not currently very accessible — it is hard for screen reader users to associate data rows and columns together, and the table also has no kind of summary to make it clear what it shows. Can you add some features to your HTML to fix this problem?
 
-> _Note your findings here..._
+## Pagination, filtering and one measured index
+
+### Findings
+
+| Query | Plan | Buffers | Execution time |
+|---|---|---|---|
+| Page 1, with index | `Index Scan Backward` (index read in reverse) | 5 | 0.030–0.034 ms |
+| Page ~500 via cursor, with index | `Index Scan Backward`, cursor used as index condition | 6 | 0.037–0.041 ms |
+| Page ~500 via `OFFSET 10000`, with index | `Bitmap Heap Scan` + `Sort` of 10,021 rows | 1,384 | 5.73–5.90 ms |
+| Page 1, without index | `Seq Scan` (87,500 rows filtered out) + `top-N heapsort` | 1,217 | 5.15–5.33 ms |
+| Page ~500 via cursor, without index | `Seq Scan` (97,500 rows filtered out) + sort | 1,217 | 5.04–5.35 ms |
+
+What this shows:
+- **The index is about 160× faster** for page 1 (5.2 ms vs 0.033 ms), and reads 5 pages of 8 kB instead of the whole table's 1,217.
+- **With a cursor, page 500 costs the same as page 1** (0.04 ms). With `OFFSET`, the same depth costs about 150× more even with the index, because Postgres has to read and sort 10,021 rows to throw 10,000 away.
+- **Without the index, every page costs the same high price,** because each one scans the whole table.
+
+Plans are found in 
+
+> apps/api/sql/explain-comments.sql
 
 <p>© 2026 Leon Freudenthaler (Hochschule Campus Wien). All rights reversed.</p>

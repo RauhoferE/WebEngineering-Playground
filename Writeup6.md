@@ -47,3 +47,16 @@ N+1: “comments for all bears” written naively is one query for the bears, pl
 How your repository avoids it: listByBears(ids) makes one WHERE bear_id IN (...) query and groups the rows in memory, so it’s always 2 queries no matter how many bears there are. Because the batching lives in the repository, the service can never accidentally loop over queries.
 
 Caveat: IN with thousands of IDs, or bears with unbounded comment counts, need pagination or a LATERAL join with a per-bear limit (slide 29).
+
+## Task 4
+
+- **Why `OFFSET` gets slower, and skips or repeats rows:**
+  - `LIMIT 20 OFFSET 10000` makes Postgres read and sort 10,020 rows only to throw 10,000 away, so page 500 costs 500 times page 1.
+  - A comment inserted between two page loads shifts every row by one: one row appears twice and another is skipped (a delete does the reverse).
+- **How a cursor avoids that:** it says "continue after (created_at, id)", which is a position in the sort order, not a count. The index jumps straight to that position, so every page costs the same, and inserts elsewhere don't shift it.
+- **What a B-tree is:** a balanced tree of sorted keys. The root and inner pages route a lookup to a leaf in 3–4 page reads, and the leaves are linked, so after the jump Postgres walks sideways in order. That's why the index also delivers the `ORDER BY` without a sort.
+- **Why column order matters:**
+  - The rule: equality columns first, then the range or sort columns. `(bear_id, created_at, id)` serves `WHERE bear_id = $1 ORDER BY created_at DESC, id DESC` plus the cursor condition.
+  - `(created_at, bear_id)` couldn't: one bear's comments would be scattered across the whole index.
+  - The same index also doesn't help `WHERE created_at > $1` on its own, because the leading column isn't constrained.
+- **Why Postgres may ignore an index on a small table:** the planner estimates costs. For a table that fits in a few pages, reading everything in one sequential pass is cheaper than jumping through an index and then into the table.

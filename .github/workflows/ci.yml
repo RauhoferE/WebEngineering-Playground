@@ -14,9 +14,7 @@ jobs:
         with:
           node-version: 24
           cache: npm
-      # Run tests
-      - run: npm test
-      # Install strictly from package-lock.json
+      # Install strictly from package-lock.json (must come first: every later step needs node_modules)
       - run: npm ci
       # Typecheck without emmiting files
       - run: npm run typecheck
@@ -26,3 +24,5 @@ jobs:
       - run: npm run lint
       # Run prettier check
       - run: npm run format:check
+      # Run tests (in-memory repositories, so no database needed in CI)
+      - run: npm test

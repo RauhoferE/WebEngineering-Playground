@@ -14,7 +14,8 @@
     "db:migrate": "tsx --env-file-if-exists=../../.env src/scripts/migrate.ts",
     "db:seed": "tsx --env-file-if-exists=../../.env src/scripts/seed.ts",
     "test": "tsx --test \"src/**/*.test.ts\"",
-    "db:seed:comments": "tsx --env-file-if-exists=../../.env src/scripts/seed-comments.ts"
+    "db:seed:comments": "tsx --env-file-if-exists=../../.env src/scripts/seed-comments.ts",
+    "report:storm": "tsx src/scripts/report-storm.ts"
   },
   "keywords": [],
   "author": "",

@@ -7,12 +7,34 @@ import { InvalidCursorError, NotFoundError } from '../schemas/errors.js';
 import type { BearService } from './bear-service.js';
 import type { CommentRepository } from '../repositories/comment-repository.js';
 import { decodeCursor, encodeCursor } from '../schemas/cursor.js';
+import type { UnitOfWork } from '../repositories/unit-of-work.js';
+
+export type ReportMode = 'naive' | 'transaction' | 'locked';
 
 export class CommentService {
   constructor(
     private readonly comments: CommentRepository,
-    private readonly bears: BearService
+    private readonly bears: BearService,
+    private readonly uow: UnitOfWork,
+    private readonly reportMode: ReportMode
   ) {}
+
+  async get(id: string): Promise<Comment> {
+    const comment = await this.comments.findById(id);
+    if (comment === null) throw new NotFoundError(`No comment with id "${id}"`);
+    return comment;
+  }
+
+  async report(id: string): Promise<Comment> {
+    if (this.reportMode === 'naive') {
+      return await reportOnce(this.comments, id, false);
+    }
+    // One transaction: BEGIN ... COMMIT; rolled back if anything throws
+    return await this.uow.run(
+      async ({ comments }) =>
+        await reportOnce(comments, id, this.reportMode === 'locked')
+    );
+  }
 
   async list(
     bearId: string,
@@ -45,4 +67,19 @@ export class CommentService {
       throw new NotFoundError(`No comment with id "${id}"`);
     }
   }
+}
+
+async function reportOnce(
+  comments: CommentRepository,
+  id: string,
+  lock: boolean
+): Promise<Comment> {
+  const current = await comments.findById(id, { lock });
+  if (current === null) throw new NotFoundError(`No comment with id "${id}"`);
+  const reportCount = current.reportCount + 1;
+  const hiddenAt =
+    reportCount >= 3 && current.hiddenAt === null
+      ? new Date().toISOString()
+      : current.hiddenAt;
+  return await comments.updateReportState(id, { reportCount, hiddenAt });
 }

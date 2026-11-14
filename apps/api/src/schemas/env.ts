@@ -21,6 +21,7 @@ export const Env = z.object({
     ),
   DATABASE_URL: z.url({ protocol: /^postgres(ql)?$/ }),
   DB_POOL_MAX: z.coerce.number().int().positive().default(10),
+  REPORT_MODE: z.enum(['naive', 'transaction', 'locked']).default('locked'),
 });
 
 export type Env = z.infer<typeof Env>;

@@ -120,7 +120,12 @@ export function buildApp(
   const bears = new BearService(deps.repos.bears);
   void app.register(bearRoutes, { bears });
   void app.register(commentRoutes, {
-    comments: new CommentService(deps.repos.comments, bears),
+    comments: new CommentService(
+      deps.repos.comments,
+      bears,
+      deps.uow,
+      env.REPORT_MODE
+    ),
   });
 
   return app;

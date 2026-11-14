@@ -36,6 +36,7 @@ services:
       UPSTREAM_TIMEOUT_MS: '5000'
       CORS_ORIGINS: http://localhost:4173
       DATABASE_URL: postgres://${POSTGRES_USER:-bears}:${POSTGRES_PASSWORD:-bears}@db:5432/${POSTGRES_DB:-bears}
+      REPORT_MODE: ${REPORT_MODE:-locked}
     depends_on:
       db:
         condition: service_healthy

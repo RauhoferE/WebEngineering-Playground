@@ -36,6 +36,8 @@ export const comments = pgTable(
     createdAt: timestamp('created_at', { withTimezone: true, precision: 3 }) // Used because js can at most use milliseconds
       .notNull()
       .defaultNow(),
+    reportCount: integer('report_count').notNull().default(0),
+    hiddenAt: timestamp('hidden_at', { withTimezone: true, precision: 3 }),
   },
   (t) => [
     index('comments_bear_created_idx').on(t.bearId, t.createdAt, t.id),
@@ -44,5 +46,6 @@ export const comments = pgTable(
       sql`char_length(${t.author}) BETWEEN 1 AND 80`
     ),
     check('comments_text_len', sql`char_length(${t.text}) BETWEEN 1 AND 2000`),
+    check('comments_report_count_nonneg', sql`${t.reportCount} >= 0`),
   ]
 );

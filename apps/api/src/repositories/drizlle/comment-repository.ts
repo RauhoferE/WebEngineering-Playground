@@ -1,8 +1,9 @@
-import { and, asc, desc, eq, inArray, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, isNull, sql } from 'drizzle-orm';
 import type {
   CommentRepository,
   PageRequest,
   PageResult,
+  ReportState,
 } from '../comment-repository.js';
 import type { Comment, NewComment } from '../../schemas/comment.js';
 import type { Db } from '../../db/client.js';
@@ -20,6 +21,7 @@ export class DrizzleCommentRepository implements CommentRepository {
       .from(comments)
       .where(
         and(
+          isNull(comments.hiddenAt),
           eq(comments.bearId, bearId),
           after === null
             ? undefined
@@ -61,6 +63,29 @@ export class DrizzleCommentRepository implements CommentRepository {
       .where(eq(comments.id, id))
       .returning({ id: comments.id });
     return deleted.length > 0;
+  }
+
+  async findById(
+    id: string,
+    opts: { lock?: boolean } = {}
+  ): Promise<Comment | null> {
+    const query = this.db.select().from(comments).where(eq(comments.id, id));
+    const [row] = await (opts.lock === true ? query.for('update') : query);
+    return row === undefined ? null : toComment(row);
+  }
+
+  async updateReportState(id: string, state: ReportState): Promise<Comment> {
+    const [row] = await this.db
+      .update(comments)
+      .set({
+        reportCount: state.reportCount,
+        hiddenAt: state.hiddenAt === null ? null : new Date(state.hiddenAt),
+      })
+      .where(eq(comments.id, id))
+      .returning();
+    if (row === undefined)
+      throw new Error(`comment ${id} vanished during update`);
+    return toComment(row);
   }
 }
 

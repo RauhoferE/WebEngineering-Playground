@@ -4,6 +4,7 @@ import type {
   CommentRepository,
   PageRequest,
   PageResult,
+  ReportState,
 } from '../comment-repository.js';
 
 export class MemoryCommentRepository implements CommentRepository {
@@ -27,7 +28,7 @@ export class MemoryCommentRepository implements CommentRepository {
       (c.createdAt === after.createdAt && c.id < after.id);
 
     const rows = [...this.comments.values()]
-      .filter((c) => c.bearId === bearId && isBefore(c))
+      .filter((c) => c.bearId === bearId && isBefore(c) && c.hiddenAt === null)
       .sort(newestFirst)
       .slice(0, limit + 1);
     return { items: rows.slice(0, limit), hasMore: rows.length > limit };
@@ -54,5 +55,21 @@ export class MemoryCommentRepository implements CommentRepository {
 
   async delete(id: string): Promise<boolean> {
     return this.comments.delete(id);
+  }
+
+  // No lock option: there is no concurrent writer to block in a single Map
+  async findById(id: string): Promise<Comment | null> {
+    return this.comments.get(id) ?? null;
+  }
+
+  async updateReportState(id: string, state: ReportState): Promise<Comment> {
+    const current = this.comments.get(id);
+    if (current === undefined) {
+      throw new Error(`comment ${id} vanished during update`);
+    }
+    // New object, like a fresh database row; comments returned earlier stay unchanged
+    const updated: Comment = { ...current, ...state };
+    this.comments.set(id, updated);
+    return updated;
   }
 }

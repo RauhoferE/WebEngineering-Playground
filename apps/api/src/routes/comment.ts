@@ -56,4 +56,26 @@ export const commentRoutes: FastifyPluginAsyncZod<{
       return await reply.code(204).send(null);
     }
   );
+
+  app.get(
+    '/api/comments/:commentId',
+    {
+      schema: {
+        params: z.object({ commentId: z.uuid() }),
+        response: { 200: Comment, ...problemResponse },
+      },
+    },
+    async (req) => await comments.get(req.params.commentId)
+  );
+
+  app.post(
+    '/api/comments/:commentId/report',
+    {
+      schema: {
+        params: z.object({ commentId: z.uuid() }),
+        response: { 200: Comment, ...problemResponse },
+      },
+    },
+    async (req) => await comments.report(req.params.commentId)
+  );
 };

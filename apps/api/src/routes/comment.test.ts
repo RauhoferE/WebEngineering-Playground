@@ -18,26 +18,28 @@ function steppingClock(): () => Date {
 }
 
 function testDeps(): AppDeps {
+  const repos = {
+    bears: new MemoryBearRepository([
+      {
+        id: 'u-arctos',
+        name: 'Brown bear',
+        binomial: 'U. arctos',
+        imageUrl: null,
+        range: 'Eurasia',
+      },
+      {
+        id: 'u-maritimus',
+        name: 'Polar bear',
+        binomial: 'U. maritimus',
+        imageUrl: null,
+        range: 'Arctic',
+      },
+    ]),
+    comments: new MemoryCommentRepository(steppingClock()),
+  };
   return {
-    repos: {
-      bears: new MemoryBearRepository([
-        {
-          id: 'u-arctos',
-          name: 'Brown bear',
-          binomial: 'U. arctos',
-          imageUrl: null,
-          range: 'Eurasia',
-        },
-        {
-          id: 'u-maritimus',
-          name: 'Polar bear',
-          binomial: 'U. maritimus',
-          imageUrl: null,
-          range: 'Arctic',
-        },
-      ]),
-      comments: new MemoryCommentRepository(steppingClock()),
-    },
+    repos,
+    uow: { run: async (work) => await work(repos) },
     ping: async () => {},
     close: async () => {},
   };

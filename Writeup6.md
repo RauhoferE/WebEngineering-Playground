@@ -50,6 +50,9 @@ Caveat: IN with thousands of IDs, or bears with unbounded comment counts, need p
 
 ## Task 4
 
+Task 4 begins at commit ab3213f03f37e5421c213b4dedd1e9fdcfa68a0a. 
+"Task3: Changed created add property to milliseconds"
+
 - **Why `OFFSET` gets slower, and skips or repeats rows:**
   - `LIMIT 20 OFFSET 10000` makes Postgres read and sort 10,020 rows only to throw 10,000 away, so page 500 costs 500 times page 1.
   - A comment inserted between two page loads shifts every row by one: one row appears twice and another is skipped (a delete does the reverse).

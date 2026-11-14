@@ -6,11 +6,11 @@ import type {
   ReportState,
 } from '../comment-repository.js';
 import type { Comment, NewComment } from '../../schemas/comment.js';
-import type { Db } from '../../db/client.js';
+import type { Executor } from '../../db/client.js';
 import { comments } from '../../db/schema.js';
 
 export class DrizzleCommentRepository implements CommentRepository {
-  constructor(private readonly db: Db) {}
+  constructor(private readonly db: Executor) {}
 
   async listByBear(
     bearId: string,

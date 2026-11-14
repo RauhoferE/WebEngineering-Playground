@@ -33,14 +33,19 @@ const fixture: Bear[] = [
 ];
 
 function setup(t: TestContext): ReturnType<typeof buildApp> {
-  const app = buildApp(env, () => ({
-    repos: {
+  const app = buildApp(env, () => {
+    const repos = {
       bears: new MemoryBearRepository(fixture),
       comments: new MemoryCommentRepository(),
-    },
-    ping: async () => {},
-    close: async () => {},
-  }));
+    };
+    return {
+      repos,
+      // No real transaction in memory: run the work against the same repositories
+      uow: { run: async (work) => await work(repos) },
+      ping: async () => {},
+      close: async () => {},
+    };
+  });
   t.after(async () => {
     await app.close();
   });

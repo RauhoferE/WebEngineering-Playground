@@ -17,9 +17,11 @@ import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import { type Repos } from './repositories/repos.js';
 import { createPostgresDeps } from './db/postgres-deps.js';
+import type { UnitOfWork } from './repositories/unit-of-work.js';
 
 export interface AppDeps {
   repos: Repos;
+  uow: UnitOfWork;
   ping: () => Promise<void>; // used by /health/ready
   close: () => Promise<void>; // runs in onClose
 }

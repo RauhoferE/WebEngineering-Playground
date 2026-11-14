@@ -1,5 +1,5 @@
 import { asc, eq, ilike } from 'drizzle-orm';
-import type { Db } from '../../db/client.js';
+import type { Executor } from '../../db/client.js';
 import { bears } from '../../db/schema.js';
 import { type Bear } from '../../schemas/bear.js';
 import type { BearRepository } from '../bear-repository.js';
@@ -8,7 +8,7 @@ import type { BearRepository } from '../bear-repository.js';
 const escapeLike = (s: string): string => s.replace(/[\\%_]/g, '\\$&');
 
 export class DrizzleBearRepository implements BearRepository {
-  constructor(private readonly db: Db) {}
+  constructor(private readonly db: Executor) {}
 
   async list({ q }: { q?: string }): Promise<Bear[]> {
     const rows = await this.db

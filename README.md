@@ -273,4 +273,30 @@ Plans are found in
 
 > apps/api/sql/explain-comments.sql
 
+## Transactions and the lost update
+
+> Dont forget to run db:seed before analyzing
+
+50 concurrent reports per run
+
+| Mode        | Run | Requests | Answered 200 | Final count | Lost updates | Hidden |
+| ----------- | --: | -------: | -----------: | ----------: | -----------: | :----: |
+| naive       |   1 |       50 |           50 |           2 |           48 |   no   |
+| naive       |   2 |       50 |           50 |           2 |           48 |   no   |
+| naive       |   3 |       50 |           50 |           2 |           48 |   no   |
+| transaction |   1 |       50 |           50 |           7 |           43 |  yes   |
+| transaction |   2 |       50 |           50 |           3 |           47 |  yes   |
+| transaction |   3 |       50 |           50 |           5 |           45 |  yes   |
+| locked      |   1 |       50 |           50 |          50 |            0 |  yes   |
+| locked      |   2 |       50 |           50 |          50 |            0 |  yes   |
+| locked      |   3 |       50 |           50 |          50 |            0 |  yes   |
+
+**Summary per mode**
+
+| Mode        | Final count (min–max) | Lost updates (min–max) | Hidden after 50 reports |
+| ----------- | --------------------: | ---------------------: | :---------------------: |
+| naive       |                     2 |                     48 |      never (0 / 3)      |
+| transaction |                   3–7 |                  43–47 |     always (3 / 3)      |
+| locked      |                    50 |                      0 |     always (3 / 3)      |
+
 <p>© 2026 Leon Freudenthaler (Hochschule Campus Wien). All rights reversed.</p>

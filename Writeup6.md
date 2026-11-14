@@ -63,3 +63,25 @@ Task 4 begins at commit ab3213f03f37e5421c213b4dedd1e9fdcfa68a0a.
   - `(created_at, bear_id)` couldn't: one bear's comments would be scattered across the whole index.
   - The same index also doesn't help `WHERE created_at > $1` on its own, because the leading column isn't constrained.
 - **Why Postgres may ignore an index on a small table:** the planner estimates costs. For a table that fits in a few pages, reading everything in one sequential pass is cheaper than jumping through an index and then into the table.
+
+## Task 5
+
+- **ACID:**
+  - *Atomicity:* all of a transaction or nothing; a crash halfway leaves no trace.
+  - *Consistency:* constraints (`CHECK`, foreign keys, `UNIQUE`) are enforced at commit.
+  - *Isolation:* concurrent transactions don't see each other's unfinished work, and the isolation level decides how much they may see.
+  - *Durability:* once committed, the data survives a crash, because Postgres flushes the write-ahead log before confirming the `COMMIT`.
+- **Lost update:** two requests read the same `report_count = 5`, both compute 6, and both write 6. Both commit with no error, and one report is gone. The cause is that the write is based on a value read earlier, which another transaction changed in between.
+- **What read committed guarantees:**
+  - No dirty reads.
+  - Each statement sees a snapshot of data committed before that statement started.
+  - An `UPDATE` that hits a locked row waits, then re-checks its `WHERE` against the new version.
+- **What read committed doesn't guarantee:**
+  - Repeatable reads: two `SELECT`s in one transaction can return different data.
+  - Protection against read-modify-write in application code.
+
+  Your `transaction` mode demonstrates this. Higher levels like repeatable read and serializable don't fix it automatically either: they turn the lost update into a serialization error that you have to handle with a retry loop (slide 41).
+- **The three fixes:**
+  - *Atomic `UPDATE`* (`SET report_count = report_count + 1, hidden_at = CASE … END … RETURNING *`): one statement, so no transaction and no lock to manage. It's the shortest correct fix for counters and flags, but the logic has to fit into SQL.
+  - *Pessimistic, `SELECT … FOR UPDATE`:* lock the row, then run any logic in TypeScript within one short transaction. Writers queue on the row; with several rows locked in different orders there's a deadlock risk. Never put HTTP calls or other slow work inside the transaction, because the lock is held until `COMMIT`.
+  - *Optimistic, version column:* `UPDATE … SET version = version + 1 WHERE id = $1 AND version = $2`. If 0 rows were affected, someone else won, so reload and retry, or answer 409. No lock is held, which suits long edits that span several requests (an edit form). The cost is retry code, and a lost race the user may see.

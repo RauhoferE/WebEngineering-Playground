@@ -11,6 +11,8 @@ export const Comment = NewComment.extend({
   id: z.uuid(),
   bearId: BearId,
   createdAt: z.iso.datetime(),
+  reportCount: z.number().int().min(0),
+  hiddenAt: z.iso.datetime().nullable(),
 });
 export type Comment = z.infer<typeof Comment>;
 

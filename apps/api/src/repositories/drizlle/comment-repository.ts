@@ -71,5 +71,7 @@ function toComment(row: typeof comments.$inferSelect): Comment {
     author: row.author,
     text: row.text,
     createdAt: row.createdAt.toISOString(),
+    reportCount: row.reportCount,
+    hiddenAt: row.hiddenAt?.toISOString() ?? null,
   };
 }

@@ -45,6 +45,8 @@ export class MemoryCommentRepository implements CommentRepository {
       bearId,
       ...input,
       createdAt: this.now().toISOString(),
+      reportCount: 0,
+      hiddenAt: null,
     };
     this.comments.set(comment.id, comment);
     return comment;

@@ -4,11 +4,8 @@ import { ApiError } from '../../common/problem';
 export function CommentForm({
   onSubmit,
 }: {
-  onSubmit: (comment: { author: string; text: string }) => Promise<void>;
+  onSubmit: (comment: { text: string }) => Promise<void>;
 }): ReactElement {
-  // The state for the name input field
-  const [name, setName] = useState('');
-
   // The state for the comment input field
   const [text, setText] = useState('');
 
@@ -20,18 +17,16 @@ export function CommentForm({
   const handleSubmit = (e: FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
 
-    if (name.trim().length === 0 || text.trim().length === 0) {
-      setError("Error: Name and Comment can't be empty");
+    if (text.trim().length === 0) {
+      setError("Error: Comment can't be empty");
       setNotice('');
       return;
     }
 
-    const trimmedName = name.trim();
     const trimmedText = text.trim();
 
-    onSubmit({ author: trimmedName, text: trimmedText })
+    onSubmit({ text: trimmedText })
       .then(() => {
-        setName('');
         setText('');
         setError(null);
         setNotice('Comment added');
@@ -48,22 +43,6 @@ export function CommentForm({
 
   return (
     <form className="comment-form" onSubmit={handleSubmit} noValidate>
-      <div className="flex-pair">
-        <label htmlFor="name">Your name:</label>
-        <input
-          type="text"
-          name="name"
-          id="name"
-          autoComplete="name"
-          placeholder="Enter your name"
-          aria-invalid={error !== null && name.trim().length === 0}
-          aria-describedby={error !== null ? 'comment-error' : undefined}
-          value={name}
-          onChange={(e) => {
-            setName(e.target.value);
-          }}
-        />
-      </div>
       <div className="flex-pair">
         <label htmlFor="comment">Your comment:</label>
         <input

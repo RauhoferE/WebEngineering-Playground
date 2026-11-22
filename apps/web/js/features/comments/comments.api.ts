@@ -22,11 +22,12 @@ export async function fetchComments(
 
 export async function createComment(
   bearId: string,
-  comment: { author: string; text: string }
+  comment: { text: string }
 ): Promise<CommentEntry> {
   const res = await fetch(
     `${apiBase}/api/bears/${encodeURIComponent(bearId)}/comments`,
     {
+      credentials: 'include',
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -37,4 +38,18 @@ export async function createComment(
   );
   if (!res.ok) throw await toApiError(res);
   return (await res.json()) as CommentEntry;
+}
+
+export async function deleteComment(commentId: string): Promise<void> {
+  const res = await fetch(
+    `${apiBase}/api/comments/${encodeURIComponent(commentId)}`,
+    {
+      credentials: 'include',
+      method: 'DELETE',
+      headers: {
+        Accept: 'application/json',
+      },
+    }
+  );
+  if (!res.ok) throw await toApiError(res);
 }

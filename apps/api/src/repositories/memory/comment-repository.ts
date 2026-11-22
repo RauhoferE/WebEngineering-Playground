@@ -61,7 +61,8 @@ export class MemoryCommentRepository implements CommentRepository {
       return false;
     }
 
-    if (comment.authorId !== actor.id || actor.role !== 'moderator') {
+    // Same rule as the WHERE of the Drizzle version: moderators any, users only their own
+    if (actor.role !== 'moderator' && comment.authorId !== actor.id) {
       return false;
     }
 

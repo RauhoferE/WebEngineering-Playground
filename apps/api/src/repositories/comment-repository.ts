@@ -29,5 +29,5 @@ export interface CommentRepository {
 export interface CommentDraft {
   text: string;
   author: string;
-  authorId: string;
+  authorId: string | null; // null: seeded or legacy rows without an author
 }

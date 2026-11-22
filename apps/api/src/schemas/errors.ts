@@ -97,3 +97,10 @@ export class InvalidCursorError extends AppError {
   readonly detail =
     'The cursor is malformed. Use the nextCursor from a previous page.';
 }
+
+export class EmailTakenError extends AppError {
+  readonly status = 409;
+  readonly type = `${P}/email-taken`;
+  readonly title = 'E-mail already registered';
+  readonly detail = 'An account with this e-mail address already exists.';
+}

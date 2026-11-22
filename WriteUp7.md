@@ -34,3 +34,30 @@ Cookies are attached automatically, so a foreign site can make the browser send 
 SameSite=Lax stops the cookie on cross-site POST and fetch requests; it is still sent on top-level GET navigations. That’s why there must be no state changes on GET.
 Add JSON-only bodies (which force a CORS preflight) and an Origin check for defence in depth.
 A Bearer header set by JavaScript is immune to CSRF but exposed to XSS. That’s the trade-off between the two.
+
+## Task 3
+
+**Authentication vs authorisation:**
+  - Authentication answers "who are you?" and produces `req.user`.
+  - Authorisation answers "what may you do?": the policy turns actor, action and subject into a verdict.
+  - Keep them apart: `requireAuth` never checks roles, and the policy never checks passwords.
+
+- **401 vs 403:**
+  - 401 means not authenticated (no credential, an invalid one, or an expired one). The client should log in and retry.
+  - 403 means authenticated but not allowed. Retrying with the same identity won't help, so the UI should hide the control.
+  - The status name "Unauthorized" is a historical misnomer for this.
+  
+- **RBAC vs ownership:**
+  - RBAC grants rights by role: a moderator may delete any comment. It's coarse and easy to explain.
+  - An ownership check is attribute-based: `author_id = actor.id`.
+  - The policy combines both and denies by default. The `WHERE` repeats ownership at the data layer, so a forgotten check in a future route still can't delete someone else's row.
+  
+- **IDOR (OWASP A01:2025 Broken Access Control, the #1 risk):**
+  - The id in `DELETE /api/comments/:id` is a direct reference to an object.
+  - If the server only checks "logged in?" and never "yours?", user A can delete B's comment just by changing the id.
+  - Unguessable UUIDs don't help here: every comment id is public in the `GET` list anyway.
+  
+- **Why hiding the button isn't a security control:**
+  - The client is under the attacker's control: curl, DevTools, editing `user.role` in React state, or replaying a request from the network tab.
+  - The hidden button is UX: it avoids offering an action that would fail.
+  - The 401/204/403/204 matrix only holds because the server checks every request.

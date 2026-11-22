@@ -50,8 +50,10 @@ export async function logout(): Promise<void> {
   if (!res.ok) throw await toApiError(res);
 }
 
-export async function fetchMe(signal: AbortSignal): Promise<PublicUser | null> {
-  const res = await fetch(`${apiBase}/api/auth/logout`, {
+export async function fetchMe(
+  signal?: AbortSignal
+): Promise<PublicUser | null> {
+  const res = await fetch(`${apiBase}/api/auth/me`, {
     method: 'GET',
     headers: {
       Accept: 'application/json',
@@ -59,6 +61,8 @@ export async function fetchMe(signal: AbortSignal): Promise<PublicUser | null> {
     signal,
     credentials: 'include',
   });
+  // Not logged in is a normal state, not an error
+  if (res.status === 401) return null;
   if (!res.ok) throw await toApiError(res);
   return (await res.json()) as PublicUser;
 }

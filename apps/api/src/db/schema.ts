@@ -49,3 +49,24 @@ export const comments = pgTable(
     check('comments_report_count_nonneg', sql`${t.reportCount} >= 0`),
   ]
 );
+
+export const users = pgTable(
+  'users',
+  {
+    id: uuid('id')
+      .primaryKey()
+      .default(sql`uuidv7()`),
+    email: text('email').notNull().unique(),
+    passwordHash: text('password_hash').notNull(),
+    role: text('role', { enum: ['user', 'moderator'] })
+      .notNull()
+      .default('user'),
+    createdAt: timestamp('created_at', { withTimezone: true, precision: 3 })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    check('users_role_valid', sql`${t.role} IN ('user', 'moderator')`),
+    check('users_email_len', sql`char_length(${t.email}) BETWEEN 3 AND 254`),
+  ]
+);

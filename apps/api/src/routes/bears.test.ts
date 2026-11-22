@@ -6,6 +6,7 @@ import { BearList, type Bear } from '../schemas/bear.js';
 import { MemoryBearRepository } from '../repositories/memory/bear-repository.js';
 import { MemoryCommentRepository } from '../repositories/memory/comment-repository.js';
 import { MemoryUserRepository } from '../repositories/memory/user-repository.js';
+import { MemoryRevokeTokenRepository } from '../repositories/memory/revoke-token-repository.js';
 
 const env = Env.parse({
   DATABASE_URL: 'postgres://unused@localhost/unused',
@@ -43,6 +44,7 @@ function setup(t: TestContext): ReturnType<typeof buildApp> {
       bears: new MemoryBearRepository(fixture),
       comments: new MemoryCommentRepository(),
       users: new MemoryUserRepository(),
+      revokedTokens: new MemoryRevokeTokenRepository(),
     };
     return {
       repos,

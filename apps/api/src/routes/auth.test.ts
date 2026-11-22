@@ -7,6 +7,7 @@ import { MemoryCommentRepository } from '../repositories/memory/comment-reposito
 import { MemoryBearRepository } from '../repositories/memory/bear-repository.js';
 import { Env } from '../schemas/env.js';
 import { Problem } from '../schemas/problem.js';
+import { MemoryRevokeTokenRepository } from '../repositories/memory/revoke-token-repository.js';
 
 const env = Env.parse({
   DATABASE_URL: 'postgres://unused@localhost/unused',
@@ -24,6 +25,7 @@ function testDeps(users: MemoryUserRepository): AppDeps {
     bears: new MemoryBearRepository([]),
     comments: new MemoryCommentRepository(steppingClock()),
     users,
+    revokedTokens: new MemoryRevokeTokenRepository(),
   };
   return {
     repos,

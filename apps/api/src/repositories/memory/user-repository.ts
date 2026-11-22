@@ -8,13 +8,7 @@ export class MemoryUserRepository implements UserRepository {
   constructor(private readonly now: () => Date = () => new Date()) {}
 
   async findById(id: string): Promise<User | null> {
-    this.users.forEach((element) => {
-      if (element.id === id) {
-        return element;
-      }
-    });
-
-    return null;
+    return [...this.users.values()].find((u) => u.id === id) ?? null;
   }
 
   async findByEmail(email: string): Promise<User | null> {

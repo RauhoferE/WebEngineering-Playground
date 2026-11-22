@@ -9,6 +9,7 @@ import { Problem } from '../schemas/problem.js';
 import { MemoryBearRepository } from '../repositories/memory/bear-repository.js';
 import { MemoryCommentRepository } from '../repositories/memory/comment-repository.js';
 import { MemoryUserRepository } from '../repositories/memory/user-repository.js';
+import { MemoryRevokeTokenRepository } from '../repositories/memory/revoke-token-repository.js';
 
 const env = Env.parse({
   DATABASE_URL: 'postgres://unused@localhost/unused',
@@ -42,6 +43,7 @@ function testDeps(): AppDeps {
     ]),
     comments: new MemoryCommentRepository(steppingClock()),
     users: new MemoryUserRepository(steppingClock()),
+    revokedTokens: new MemoryRevokeTokenRepository(),
   };
   return {
     repos,

@@ -18,6 +18,8 @@ import swaggerUi from '@fastify/swagger-ui';
 import { type Repos } from './repositories/repos.js';
 import { createPostgresDeps } from './db/postgres-deps.js';
 import type { UnitOfWork } from './repositories/unit-of-work.js';
+import { authRoutes } from './routes/auth.js';
+import { AuthService } from './services/auth-service.js';
 
 export interface AppDeps {
   repos: Repos;
@@ -127,6 +129,7 @@ export function buildApp(
       env.REPORT_MODE
     ),
   });
+  void app.register(authRoutes, { auth: new AuthService(deps.repos.users) });
 
   return app;
 }

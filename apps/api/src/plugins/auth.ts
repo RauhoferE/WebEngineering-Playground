@@ -13,7 +13,7 @@ declare module 'fastify' {
 }
 
 export type RequireAuth = (req: FastifyRequest) => Promise<void>;
-
+// Middleware functions to add user to user decorator
 export function createRequireAuth(auth: AuthService): RequireAuth {
   return async (req) => {
     const user = await auth.authenticate(req.cookies[TOKEN_COOKIE]);

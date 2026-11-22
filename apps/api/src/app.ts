@@ -28,6 +28,7 @@ import { authRoutes } from './routes/auth.js';
 import { AuthService } from './services/auth-service.js';
 import { TokenService } from './services/token-service.js';
 import { createRequireAuth } from './plugins/auth.js';
+import { registerSecurity } from './plugins/security.js';
 
 export interface AppDeps {
   repos: Repos;
@@ -47,6 +48,10 @@ export function buildApp(
     logger: true,
     requestIdHeader: 'x-request-id',
     genReqId: () => randomUUID(),
+    // Limit body size to 2000 chars
+    bodyLimit: 16 * 1024,
+    // Only behind nginx (compose sets it); otherwise X-Forwarded-For is ignored and can't be spoofed
+    trustProxy: env.TRUST_PROXY ?? false,
   });
 
   const deps = createDeps(env, app.log);
@@ -70,15 +75,20 @@ export function buildApp(
     maxAge: 600, // browser may cache the preflight for 10 minutes
   });
 
-  void app.register(swagger, {
-    openapi: {
-      openapi: '3.1.0',
-      info: { title: 'Bear API', version: '0.1.0' },
-    },
-    transform: jsonSchemaTransform,
-    transformObject: jsonSchemaTransformObject, // named schemas -> components.schemas
-  });
-  void app.register(swaggerUi, { routePrefix: '/api/docs' });
+  // Register rate limiting
+  registerSecurity(app, env.NODE_ENV === 'production');
+
+  if (env.NODE_ENV !== 'production') {
+    void app.register(swagger, {
+      openapi: {
+        openapi: '3.1.0',
+        info: { title: 'Bear API', version: '0.1.0' },
+      },
+      transform: jsonSchemaTransform,
+      transformObject: jsonSchemaTransformObject, // named schemas -> components.schemas
+    });
+    void app.register(swaggerUi, { routePrefix: '/api/docs' });
+  }
 
   // Minimal mapping: Task 4 turns this into application/problem+json
   app.setErrorHandler((err, req, reply) => {
@@ -110,7 +120,7 @@ export function buildApp(
 
   app.get('/health', async () => ({
     status: 'ok',
-    version: process.env.APP_VERSION ?? 'dev',
+    version: env.APP_VERSION ?? 'dev',
     uptime: Math.round(process.uptime()),
   }));
 
@@ -123,7 +133,7 @@ export function buildApp(
     return { status: 'ready' };
   });
 
-  if (process.env.NODE_ENV !== 'production') {
+  if (env.NODE_ENV !== 'production') {
     app.get('/api/debug/error', async () => {
       throw new Error('provoked failure');
     });

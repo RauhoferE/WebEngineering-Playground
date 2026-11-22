@@ -27,6 +27,8 @@ export const Env = z.object({
     .default('development'),
   JWT_SECRET: z.string().min(32),
   JWT_TTL_SECONDS: z.coerce.number().int().positive().default(3600),
+  TRUST_PROXY: z.boolean().default(false),
+  APP_VERSION: z.string().default('dev'),
 });
 
 export type Env = z.infer<typeof Env>;

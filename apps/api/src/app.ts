@@ -127,7 +127,7 @@ export function buildApp(
   const bears = new BearService(deps.repos.bears);
   const tokenService = new TokenService(
     process.env.JWT_SECRET,
-    (process.env.JWT_TTL_SECONDS as number) ?? 3600
+    Number(process.env.JWT_TTL_SECONDS) ?? 3600
   );
   void app.register(bearRoutes, { bears });
   void app.register(commentRoutes, {

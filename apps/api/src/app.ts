@@ -12,6 +12,7 @@ import { BearService } from './services/bear-service.js';
 import { bearRoutes } from './routes/bears.js';
 import { commentRoutes } from './routes/comment.js';
 import { CommentService } from './services/comment-service.js';
+import cookie from '@fastify/cookie';
 import cors from '@fastify/cors';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
@@ -21,6 +22,7 @@ import type { UnitOfWork } from './repositories/unit-of-work.js';
 import { authRoutes } from './routes/auth.js';
 import { AuthService } from './services/auth-service.js';
 import { TokenService } from './services/token-service.js';
+import { createRequireAuth } from './plugins/auth.js';
 
 export interface AppDeps {
   repos: Repos;
@@ -59,7 +61,7 @@ export function buildApp(
     methods: ['GET', 'POST', 'DELETE'],
     allowedHeaders: ['content-type', 'x-request-id'],
     exposedHeaders: ['location', 'x-request-id'],
-    credentials: false, // true in unit 3 (sessions)
+    credentials: true, // the auth cookie must travel with cross-origin requests (frontend on :4173)
     maxAge: 600, // browser may cache the preflight for 10 minutes
   });
 
@@ -119,16 +121,16 @@ export function buildApp(
     });
   }
 
-  if (process.env.JWT_SECRET === undefined) {
-    throw new Error('No JWT Secret found');
-  }
-
   // Assign bear service to const, so we can reuse it in the comment service, which needs to check if a bear exists before adding a comment
   const bears = new BearService(deps.repos.bears);
-  const tokenService = new TokenService(
-    process.env.JWT_SECRET,
-    Number(process.env.JWT_TTL_SECONDS) ?? 3600
+  const auth = new AuthService(
+    deps.repos.users,
+    deps.repos.revokedTokens,
+    new TokenService(env.JWT_SECRET, env.JWT_TTL_SECONDS)
   );
+
+  void app.register(cookie);
+  app.decorateRequest('user', null);
   void app.register(bearRoutes, { bears });
   void app.register(commentRoutes, {
     comments: new CommentService(
@@ -139,11 +141,10 @@ export function buildApp(
     ),
   });
   void app.register(authRoutes, {
-    auth: new AuthService(
-      deps.repos.users,
-      deps.repos.revokedTokens,
-      tokenService
-    ),
+    auth,
+    requireAuth: createRequireAuth(auth),
+    secureCookie: env.NODE_ENV === 'production',
+    ttlSeconds: env.JWT_TTL_SECONDS,
   });
 
   return app;

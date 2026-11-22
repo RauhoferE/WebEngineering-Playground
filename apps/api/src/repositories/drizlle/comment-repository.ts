@@ -1,13 +1,15 @@
 import { and, asc, desc, eq, inArray, isNull, sql } from 'drizzle-orm';
 import type {
+  CommentDraft,
   CommentRepository,
   PageRequest,
   PageResult,
   ReportState,
 } from '../comment-repository.js';
-import type { Comment, NewComment } from '../../schemas/comment.js';
+import type { Comment } from '../../schemas/comment.js';
 import type { Executor } from '../../db/client.js';
 import { comments } from '../../db/schema.js';
+import type { Actor } from '../../auth/policy.js';
 
 export class DrizzleCommentRepository implements CommentRepository {
   constructor(private readonly db: Executor) {}
@@ -48,19 +50,26 @@ export class DrizzleCommentRepository implements CommentRepository {
     return grouped;
   }
 
-  async create(bearId: string, input: NewComment): Promise<Comment> {
+  async create(bearId: string, draft: CommentDraft): Promise<Comment> {
     const [row] = await this.db
       .insert(comments)
-      .values({ bearId, ...input })
+      .values({ bearId, ...draft })
       .returning();
     if (row === undefined) throw new Error('insert returned no row');
     return toComment(row);
   }
 
-  async delete(id: string): Promise<boolean> {
+  async delete(id: string, actor: Actor): Promise<boolean> {
     const deleted = await this.db
       .delete(comments)
-      .where(eq(comments.id, id))
+      .where(
+        and(
+          eq(comments.id, id),
+          actor.role === 'moderator'
+            ? undefined
+            : eq(comments.authorId, actor.id)
+        )
+      )
       .returning({ id: comments.id });
     return deleted.length > 0;
   }
@@ -92,6 +101,7 @@ export class DrizzleCommentRepository implements CommentRepository {
 function toComment(row: typeof comments.$inferSelect): Comment {
   return {
     id: row.id,
+    authorId: row.authorId,
     bearId: row.bearId,
     author: row.author,
     text: row.text,

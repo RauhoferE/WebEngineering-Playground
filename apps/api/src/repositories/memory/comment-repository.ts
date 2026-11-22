@@ -1,11 +1,13 @@
 import { randomUUID } from 'crypto';
-import type { Comment, NewComment } from '../../schemas/comment.js';
+import type { Comment } from '../../schemas/comment.js';
 import type {
+  CommentDraft,
   CommentRepository,
   PageRequest,
   PageResult,
   ReportState,
 } from '../comment-repository.js';
+import type { Actor } from '../../auth/policy.js';
 
 export class MemoryCommentRepository implements CommentRepository {
   private readonly comments = new Map<string, Comment>();
@@ -40,11 +42,11 @@ export class MemoryCommentRepository implements CommentRepository {
     return grouped;
   }
 
-  async create(bearId: string, input: NewComment): Promise<Comment> {
+  async create(bearId: string, draft: CommentDraft): Promise<Comment> {
     const comment: Comment = {
       id: randomUUID(),
       bearId,
-      ...input,
+      ...draft,
       createdAt: this.now().toISOString(),
       reportCount: 0,
       hiddenAt: null,
@@ -53,7 +55,16 @@ export class MemoryCommentRepository implements CommentRepository {
     return comment;
   }
 
-  async delete(id: string): Promise<boolean> {
+  async delete(id: string, actor: Actor): Promise<boolean> {
+    const comment = this.comments.get(id);
+    if (comment === undefined) {
+      return false;
+    }
+
+    if (comment.authorId !== actor.id || actor.role !== 'moderator') {
+      return false;
+    }
+
     return this.comments.delete(id);
   }
 

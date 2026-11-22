@@ -1,4 +1,5 @@
-import type { Comment, NewComment } from '../schemas/comment.js';
+import type { Actor } from '../auth/policy.js';
+import type { Comment } from '../schemas/comment.js';
 import type { CursorKey } from '../schemas/cursor.js';
 
 export interface PageRequest {
@@ -19,8 +20,14 @@ export interface ReportState {
 export interface CommentRepository {
   listByBear: (bearId: string, page: PageRequest) => Promise<PageResult>;
   listByBears: (bearIds: string[]) => Promise<Map<string, Comment[]>>;
-  create: (bearId: string, input: NewComment) => Promise<Comment>;
-  delete: (id: string) => Promise<boolean>;
+  create: (bearId: string, draft: CommentDraft) => Promise<Comment>;
+  delete: (id: string, actor: Actor) => Promise<boolean>;
   findById: (id: string, opts?: { lock?: boolean }) => Promise<Comment | null>;
   updateReportState: (id: string, state: ReportState) => Promise<Comment>;
+}
+
+export interface CommentDraft {
+  text: string;
+  author: string;
+  authorId: string;
 }

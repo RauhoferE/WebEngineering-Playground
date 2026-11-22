@@ -7,6 +7,7 @@ import { DrizzleBearRepository } from '../repositories/drizlle/bear-repository.j
 import { DrizzleCommentRepository } from '../repositories/drizlle/comment-repository.js';
 import type { Repos } from '../repositories/repos.js';
 import type { UnitOfWork } from '../repositories/unit-of-work.js';
+import { DrizzleUserRepository } from '../repositories/drizlle/user-repository.js';
 
 export function createPostgresDeps(env: Env, log: FastifyBaseLogger): AppDeps {
   // Create connection pool
@@ -40,5 +41,6 @@ function createRepos(executor: Executor): Repos {
   return {
     bears: new DrizzleBearRepository(executor),
     comments: new DrizzleCommentRepository(executor),
+    users: new DrizzleUserRepository(executor),
   };
 }

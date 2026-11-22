@@ -20,6 +20,7 @@ import { createPostgresDeps } from './db/postgres-deps.js';
 import type { UnitOfWork } from './repositories/unit-of-work.js';
 import { authRoutes } from './routes/auth.js';
 import { AuthService } from './services/auth-service.js';
+import { TokenService } from './services/token-service.js';
 
 export interface AppDeps {
   repos: Repos;
@@ -120,6 +121,10 @@ export function buildApp(
 
   // Assign bear service to const, so we can reuse it in the comment service, which needs to check if a bear exists before adding a comment
   const bears = new BearService(deps.repos.bears);
+  const tokenService = new TokenService(
+    process.env.JWT_SECRET,
+    process.env.JWT_TTL_SECONDS
+  );
   void app.register(bearRoutes, { bears });
   void app.register(commentRoutes, {
     comments: new CommentService(
@@ -129,7 +134,13 @@ export function buildApp(
       env.REPORT_MODE
     ),
   });
-  void app.register(authRoutes, { auth: new AuthService(deps.repos.users) });
+  void app.register(authRoutes, {
+    auth: new AuthService(
+      deps.repos.users,
+      deps.repos.revokedTokens,
+      tokenService
+    ),
+  });
 
   return app;
 }

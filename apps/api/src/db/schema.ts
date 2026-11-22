@@ -70,3 +70,12 @@ export const users = pgTable(
     check('users_email_len', sql`char_length(${t.email}) BETWEEN 3 AND 254`),
   ]
 );
+
+export const revokedTokens = pgTable(
+  'revoked_tokens',
+  {
+    jti: uuid('jti').primaryKey(),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  },
+  (t) => [index('revoked_tokens_expires_idx').on(t.expiresAt)]
+);

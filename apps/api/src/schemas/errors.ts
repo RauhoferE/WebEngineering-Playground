@@ -124,3 +124,13 @@ export class ForbiddenError extends AppError {
     super(detail);
   }
 }
+
+export class RateLimitedError extends AppError {
+  readonly status = 429;
+  readonly type = `${P}/rate-limited`;
+  readonly title = 'Too many requests';
+
+  constructor(readonly retryAfterSeconds: number) {
+    super(`Too many attempts. Try again in ${retryAfterSeconds} seconds.`);
+  }
+}

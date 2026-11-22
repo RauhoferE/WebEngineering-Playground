@@ -6,7 +6,12 @@ import {
   validatorCompiler,
 } from '@fastify/type-provider-zod';
 import { randomUUID } from 'node:crypto';
-import { NotReadyError, problem, toProblem } from './schemas/errors.js';
+import {
+  NotReadyError,
+  problem,
+  RateLimitedError,
+  toProblem,
+} from './schemas/errors.js';
 import type { Env } from './schemas/env.js';
 import { BearService } from './services/bear-service.js';
 import { bearRoutes } from './routes/bears.js';
@@ -60,7 +65,7 @@ export function buildApp(
     origin: env.CORS_ORIGINS, // allow-list, never "*" or reflecting every origin
     methods: ['GET', 'POST', 'DELETE'],
     allowedHeaders: ['content-type', 'x-request-id'],
-    exposedHeaders: ['location', 'x-request-id'],
+    exposedHeaders: ['location', 'x-request-id', 'retry-after'],
     credentials: true, // the auth cookie must travel with cross-origin requests (frontend on :4173)
     maxAge: 600, // browser may cache the preflight for 10 minutes
   });
@@ -82,6 +87,9 @@ export function buildApp(
       req.log.error({ err }, 'request failed');
     } else {
       req.log.info({ err }, 'request rejected');
+    }
+    if (err instanceof RateLimitedError) {
+      void reply.header('retry-after', err.retryAfterSeconds);
     }
     return reply.code(p.status).type('application/problem+json').send(p);
   });

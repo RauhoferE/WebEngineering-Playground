@@ -1,11 +1,21 @@
 const API = process.env.API_URL ?? 'http://localhost:3000';
 const N = Number(process.argv[2] ?? 50);
 
+const loginRes = await fetch(`${API}/api/auth/login`, {
+  method: 'POST',
+  headers: { 'content-type': 'application/json' },
+  body: JSON.stringify({
+    email: process.env.MODERATOR_EMAIL,
+    password: process.env.MODERATOR_PASSWORD,
+  }),
+});
+const cookie = loginRes.headers.getSetCookie()[0]?.split(';')[0] ?? '';
+
 // A fresh comment per run, so earlier runs cannot distort the count
 const created = await fetch(`${API}/api/bears/u-arctos/comments`, {
   method: 'POST',
-  headers: { 'content-type': 'application/json' },
-  body: JSON.stringify({ author: 'Report storm', text: 'please report me' }),
+  headers: { 'content-type': 'application/json', cookie },
+  body: JSON.stringify({ text: 'please report me' }),
 });
 const { id } = (await created.json()) as { id: string };
 

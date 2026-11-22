@@ -8,11 +8,18 @@ import {
   NewComment,
 } from '../schemas/comment.js';
 import type { CommentService } from '../services/comment-service.js';
-import { problemResponse } from '../schemas/problem.js';
+import { Problem, problemResponse } from '../schemas/problem.js';
+import { currentUser, type RequireAuth } from '../plugins/auth.js';
 
-export const commentRoutes: FastifyPluginAsyncZod<{
+export interface CommentRouteOptions {
   comments: CommentService;
-}> = async (app, { comments }) => {
+  requireAuth: RequireAuth;
+}
+
+export const commentRoutes: FastifyPluginAsyncZod<CommentRouteOptions> = async (
+  app,
+  { comments, requireAuth }
+) => {
   app.get(
     '/api/bears/:id/comments',
     {
@@ -28,14 +35,19 @@ export const commentRoutes: FastifyPluginAsyncZod<{
   app.post(
     '/api/bears/:id/comments',
     {
+      preHandler: requireAuth,
       schema: {
         params: z.object({ id: BearId }),
         body: NewComment,
-        response: { 201: Comment, ...problemResponse },
+        response: { 201: Comment, 401: Problem, ...problemResponse },
       },
     },
     async (req, reply) => {
-      const comment = await comments.create(req.params.id, req.body);
+      const comment = await comments.create(
+        req.params.id,
+        req.body,
+        currentUser(req)
+      );
       return await reply
         .code(201)
         .header('location', `/api/comments/${comment.id}`)
@@ -46,13 +58,19 @@ export const commentRoutes: FastifyPluginAsyncZod<{
   app.delete(
     '/api/comments/:commentId',
     {
+      preHandler: requireAuth,
       schema: {
         params: z.object({ commentId: z.uuid() }),
-        response: { 204: z.null(), ...problemResponse },
+        response: {
+          204: z.null(),
+          401: Problem,
+          403: Problem,
+          ...problemResponse,
+        },
       },
     },
     async (req, reply) => {
-      await comments.delete(req.params.commentId);
+      await comments.delete(req.params.commentId, currentUser(req));
       return await reply.code(204).send(null);
     }
   );

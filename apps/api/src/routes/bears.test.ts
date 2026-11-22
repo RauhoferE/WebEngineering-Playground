@@ -7,7 +7,11 @@ import { MemoryBearRepository } from '../repositories/memory/bear-repository.js'
 import { MemoryCommentRepository } from '../repositories/memory/comment-repository.js';
 import { MemoryUserRepository } from '../repositories/memory/user-repository.js';
 
-const env = Env.parse({ DATABASE_URL: 'postgres://unused@localhost/unused' });
+const env = Env.parse({
+  DATABASE_URL: 'postgres://unused@localhost/unused',
+  JWT_SECRET:
+    'eVuixo7n6sQjoUEf3E6fLnEWTbbFXYYv_ZdRN_PaZP8sEH7GL03gQ46xNDEmLfUy',
+});
 
 const fixture: Bear[] = [
   {

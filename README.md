@@ -299,4 +299,25 @@ Plans are found in
 | transaction |                   3–7 |                  43–47 |     always (3 / 3)      |
 | locked      |                    50 |                      0 |     always (3 / 3)      |
 
+## To Start clean app
+
+### ENV
+
+```
+PORT=80
+POSTGRES_USER=user
+POSTGRES_PASSWORD=password
+POSTGRES_DB=mydbname
+
+CORS_ORIGINS=website.com
+
+
+DATABASE_URL=db_url
+JWT_SECRET=jwt_secret
+```
+
+Generate secret jwt with
+
+> node -p "require('node:crypto').randomBytes(48).toString('base64url')"
+
 <p>© 2026 Leon Freudenthaler (Hochschule Campus Wien). All rights reversed.</p>

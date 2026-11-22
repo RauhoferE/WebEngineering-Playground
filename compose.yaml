@@ -37,6 +37,7 @@ services:
       CORS_ORIGINS: http://localhost:4173
       DATABASE_URL: postgres://${POSTGRES_USER:-bears}:${POSTGRES_PASSWORD:-bears}@db:5432/${POSTGRES_DB:-bears}
       REPORT_MODE: ${REPORT_MODE:-locked}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
     depends_on:
       db:
         condition: service_healthy

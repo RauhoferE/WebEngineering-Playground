@@ -320,4 +320,29 @@ Generate secret jwt with
 
 > node -p "require('node:crypto').randomBytes(48).toString('base64url')"
 
+## ADR: Authentication with a JWT in an HttpOnly cookie
+**Context:** React SPA and our own Fastify API on the same origin (Vite proxy / nginx); users live in PostgreSQL. We need login, `/me`, and a logout that really invalidates the credential.
+
+**Options:** 
+- (a) server-side session: random id in a cookie, rows in a `sessions` table; 
+- (b) JWT in localStorage sent as `Authorization: Bearer`;
+-  (c) JWT in an HttpOnly cookie plus a `jti` denylist.
+
+**Decision:** 
+- (c). HS256 with a pinned algorithm, `iss`/`aud` checked, 1 h `exp`, claims `sub` + `jti` only. Cookie: `HttpOnly; SameSite=Lax; Path=/; Secure` in production. Logout writes the `jti` to `revoked_tokens` until `exp`. 
+- (b) was rejected because any XSS could read and exfiltrate the token.
+
+**Consequences:** 
+PRO:
++ standard, self-describing token that another service could verify with the key; 
++ XSS cannot read it. 
+
+CON:
++ Not stateless after all: every request checks the denylist and loads the user (for a fresh role), the same round trips as a session. 
++ ~300 B per request instead of a ~40 B session id. 
++ Rotating `JWT_SECRET` logs everyone out. 
++ No refresh token: users log in again after 1 h (refresh rotation would be the next step). 
++ `revoked_tokens` needs cleanup process.
+
+
 <p>© 2026 Leon Freudenthaler (Hochschule Campus Wien). All rights reversed.</p>

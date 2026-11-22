@@ -11,3 +11,26 @@ Work factor: the time and memory each guess costs. argon2id is memory-hard, so G
 Length over composition (NIST SP 800-63B-4): strength comes from length. Composition rules produce predictable patterns like Password1!, push users to reuse or write passwords down, and add little entropy. Instead: a minimum length (15, or 8 with MFA; the task uses 12), a maximum of at least 64, a check against breached passwords, and allowing paste and password managers.
 
 409 vs enumeration: a clear 409 tells anyone whether an e-mail has an account, which helps targeted phishing and credential stuffing. The alternative is to always answer “check your inbox” and send a verification mail, which needs e-mail infrastructure.
+
+## Task 2
+
+Revocation:
+Session: DELETE the row and it’s gone immediately.
+JWT: the signature stays valid until exp, so logout needs a denylist (or short lifetimes plus refresh tokens).
+
+Statelessness:
+A JWT can be verified without a lookup, but revocation, a fresh role, rate limits and audit all bring state back (slide 16).
+A session needs one store lookup per request.
+
+Size: a session id is about 40 bytes; a JWT is about 300 bytes up to several KB on every request. The cookie limit is 4 KB.
+
+Storage, and what an XSS gets:
+localStorage: the attacker reads the token itself, can use it from anywhere until exp, and you can’t tell it apart from the real user.
+Memory: the token is lost on reload, and an XSS can still hook fetch.
+HttpOnly cookie (session or JWT): the token can’t be read. The XSS can only send requests from the victim’s open tab (“session riding”), and that ends when the tab closes.
+
+SameSite and CSRF:
+Cookies are attached automatically, so a foreign site can make the browser send authenticated requests.
+SameSite=Lax stops the cookie on cross-site POST and fetch requests; it is still sent on top-level GET navigations. That’s why there must be no state changes on GET.
+Add JSON-only bodies (which force a CORS preflight) and an Origin check for defence in depth.
+A Bearer header set by JavaScript is immune to CSRF but exposed to XSS. That’s the trade-off between the two.

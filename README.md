@@ -320,6 +320,9 @@ Generate secret jwt with
 
 > node -p "require('node:crypto').randomBytes(48).toString('base64url')"
 
+Generate SEEDs
+> npm run db:seed && npm run db:seed:moderator
+
 ## ADR: Authentication with a JWT in an HttpOnly cookie
 **Context:** React SPA and our own Fastify API on the same origin (Vite proxy / nginx); users live in PostgreSQL. We need login, `/me`, and a logout that really invalidates the credential.
 

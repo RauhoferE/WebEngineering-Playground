@@ -21,6 +21,7 @@
     "db:seed": "npm run db:seed -w apps/api",
     "test": "npm run test -ws --if-present",
     "db:seed:comments": "npm run db:seed:comments -w apps/api",
+    "db:seed:moderator": "npm run db:seed:moderator -w apps/api",
     "report:storm": "npm run report:storm -w apps/api"
   },
   "lint-staged": {

@@ -114,3 +114,13 @@ export class UnauthorizedError extends AppError {
     super(detail);
   }
 }
+
+export class ForbiddenError extends AppError {
+  readonly status = 403;
+  readonly type = `${P}/forbidden`;
+  readonly title = 'Forbidden';
+
+  constructor(detail = 'You are not allowed to do this.') {
+    super(detail);
+  }
+}

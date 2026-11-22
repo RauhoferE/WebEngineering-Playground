@@ -1,15 +1,19 @@
 import { z } from 'zod';
 import { BearId } from './bear.js';
 
-export const NewComment = z.object({
-  author: z.string().trim().min(1).max(80),
-  text: z.string().trim().min(1, 'text must not be empty').max(2000),
-});
+export const NewComment = z
+  .object({
+    text: z.string().trim().min(1, 'text must not be empty').max(2000),
+  })
+  .strict();
 export type NewComment = z.infer<typeof NewComment>;
 
 export const Comment = NewComment.extend({
   id: z.uuid(),
   bearId: BearId,
+  author: z.string(),
+  authorId: z.uuid().nullable(),
+  text: z.string(),
   createdAt: z.iso.datetime(),
   reportCount: z.number().int().min(0),
   hiddenAt: z.iso.datetime().nullable(),

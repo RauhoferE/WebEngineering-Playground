@@ -128,6 +128,7 @@ export function buildApp(
     deps.repos.revokedTokens,
     new TokenService(env.JWT_SECRET, env.JWT_TTL_SECONDS)
   );
+  const requireAuth = createRequireAuth(auth);
 
   void app.register(cookie);
   app.decorateRequest('user', null);
@@ -139,10 +140,11 @@ export function buildApp(
       deps.uow,
       env.REPORT_MODE
     ),
+    requireAuth,
   });
   void app.register(authRoutes, {
     auth,
-    requireAuth: createRequireAuth(auth),
+    requireAuth,
     secureCookie: env.NODE_ENV === 'production',
     ttlSeconds: env.JWT_TTL_SECONDS,
   });

@@ -38,8 +38,12 @@ export const comments = pgTable(
       .defaultNow(),
     reportCount: integer('report_count').notNull().default(0),
     hiddenAt: timestamp('hidden_at', { withTimezone: true, precision: 3 }),
+    authorId: uuid('author_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
   },
   (t) => [
+    index('comments_author_idx').on(t.authorId),
     index('comments_bear_created_idx').on(t.bearId, t.createdAt, t.id),
     check(
       'comments_author_len',

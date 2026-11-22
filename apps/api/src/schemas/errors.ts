@@ -104,3 +104,13 @@ export class EmailTakenError extends AppError {
   readonly title = 'E-mail already registered';
   readonly detail = 'An account with this e-mail address already exists.';
 }
+
+export class UnauthorizedError extends AppError {
+  readonly status = 401;
+  readonly type = `${P}/unauthorized`;
+  readonly title = 'Not authenticated';
+
+  constructor(detail = 'You need to log in for this request.') {
+    super(detail);
+  }
+}

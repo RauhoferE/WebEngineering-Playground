@@ -20,3 +20,11 @@ export const PublicUser = z
   })
   .meta({ id: 'PublicUser' });
 export type PublicUser = z.infer<typeof PublicUser>;
+
+export const LoginBody = z
+  .object({
+    email: z.string().trim().toLowerCase().pipe(z.email().max(254)),
+    password: z.string().min(1).max(128), // the 12-character rule is for new passwords only
+  })
+  .strict();
+export type LoginBody = z.infer<typeof LoginBody>;

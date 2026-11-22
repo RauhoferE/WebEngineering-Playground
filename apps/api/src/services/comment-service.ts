@@ -8,6 +8,8 @@ import type { BearService } from './bear-service.js';
 import type { CommentRepository } from '../repositories/comment-repository.js';
 import { decodeCursor, encodeCursor } from '../schemas/cursor.js';
 import type { UnitOfWork } from '../repositories/unit-of-work.js';
+import { type User } from '../repositories/user-repository.js';
+import { type Actor, can, enforce } from '../auth/policy.js';
 
 export type ReportMode = 'naive' | 'transaction' | 'locked';
 
@@ -57,13 +59,25 @@ export class CommentService {
     };
   }
 
-  async create(bearId: string, input: NewComment): Promise<Comment> {
+  async create(
+    bearId: string,
+    input: NewComment,
+    user: User
+  ): Promise<Comment> {
+    enforce(can(user, 'comment:create'));
     await this.bears.get(bearId); // 404 for unknown bears
-    return await this.comments.create(bearId, input);
+    return await this.comments.create(bearId, {
+      text: input.text,
+      author: displayName(user),
+      authorId: user.id,
+    });
   }
 
-  async delete(id: string): Promise<void> {
-    if (!(await this.comments.delete(id))) {
+  async delete(id: string, actor: Actor): Promise<void> {
+    const comment = await this.comments.findById(id);
+    if (comment === null) throw new NotFoundError(`No comment with id "${id}"`);
+    enforce(can(actor, 'comment:delete', comment)); // 403: not yours
+    if (!(await this.comments.delete(id, actor))) {
       throw new NotFoundError(`No comment with id "${id}"`);
     }
   }
@@ -82,4 +96,9 @@ async function reportOnce(
       ? new Date().toISOString()
       : current.hiddenAt;
   return await comments.updateReportState(id, { reportCount, hiddenAt });
+}
+
+// Helper to get username
+function displayName(user: User): string {
+  return user.email.split('@')[0] ?? 'user';
 }

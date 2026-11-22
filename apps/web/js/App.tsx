@@ -7,6 +7,7 @@ import { Footer } from './features/layout/Footer';
 import { Article } from './features/article/Article';
 import { Link, Route, Routes, useLocation } from 'react-router';
 import { BearDetail } from './features/bears/BearDetail';
+import { RegisterForm } from './features/auth/RegisterForm';
 
 function pageTitle(pathname: string): string {
   if (pathname === '/') return 'The trouble with Bears';
@@ -65,6 +66,7 @@ export default function App(): ReactElement {
       <main id="main" tabIndex={-1} ref={mainRef}>
         <Routes>
           <Route path="/" element={<Article />} />
+          <Route path="/register" element={<RegisterForm />} />
           <Route path="/bear/:bearId" element={<BearDetail />} />
           <Route
             path="*"

@@ -119,11 +119,15 @@ export function buildApp(
     });
   }
 
+  if (process.env.JWT_SECRET === undefined) {
+    throw new Error('No JWT Secret found');
+  }
+
   // Assign bear service to const, so we can reuse it in the comment service, which needs to check if a bear exists before adding a comment
   const bears = new BearService(deps.repos.bears);
   const tokenService = new TokenService(
     process.env.JWT_SECRET,
-    process.env.JWT_TTL_SECONDS
+    (process.env.JWT_TTL_SECONDS as number) ?? 3600
   );
   void app.register(bearRoutes, { bears });
   void app.register(commentRoutes, {

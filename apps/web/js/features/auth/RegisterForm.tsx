@@ -1,6 +1,7 @@
 import { type FormEvent, type ReactElement, useId, useState } from 'react';
 import { ApiError } from '../../common/problem';
 import { register } from './auth.api';
+import { useNavigate } from 'react-router';
 
 type Field = 'email' | 'password';
 type FieldErrors = Partial<Record<Field, string>>;
@@ -52,6 +53,7 @@ export function RegisterForm(): ReactElement {
   // Confirmation, announced via the always-present status region
   const [notice, setNotice] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const navigate = useNavigate();
 
   const submit = async (): Promise<void> => {
     const errors = validate(email, password);
@@ -67,6 +69,7 @@ export function RegisterForm(): ReactElement {
       setNotice(`Account created for ${email.trim()}.`);
       setEmail('');
       setPassword('');
+      void navigate('/login', { replace: true });
     } catch (error: unknown) {
       if (!(error instanceof ApiError)) {
         setFormError(

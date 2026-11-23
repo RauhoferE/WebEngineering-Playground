@@ -346,3 +346,13 @@ main:focus {
 .audio-figure summary {
   cursor: pointer;
 }
+body {
+  font-family: Arial, sans-serif;
+}
+.highlight {
+  background-color: yellow;
+  color: black;
+}
+.comment-wrapper {
+  display: block;
+}

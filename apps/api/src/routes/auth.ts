@@ -8,6 +8,7 @@ import {
   TOKEN_COOKIE,
   type RequireAuth,
 } from '../plugins/auth.js';
+import { createLoginLimiter, LIMITS } from '../plugins/security.js';
 
 export interface AuthRouteOptions {
   auth: AuthService;
@@ -20,6 +21,7 @@ export const authRoutes: FastifyPluginAsyncZod<AuthRouteOptions> = async (
   app,
   { auth, requireAuth, secureCookie, ttlSeconds }
 ) => {
+  const limitLogin = createLoginLimiter(app);
   // Same attributes for set and clear, otherwise the browser keeps the old cookie
   const cookieBase = {
     httpOnly: true,
@@ -31,6 +33,7 @@ export const authRoutes: FastifyPluginAsyncZod<AuthRouteOptions> = async (
   app.post(
     '/api/auth/register',
     {
+      config: { rateLimit: LIMITS.register },
       schema: {
         body: RegisterBody,
         response: { 201: PublicUser, 409: Problem, ...problemResponse },
@@ -43,6 +46,8 @@ export const authRoutes: FastifyPluginAsyncZod<AuthRouteOptions> = async (
   app.post(
     '/api/auth/login',
     {
+      // Uses prehandler since we need the body for email rate limit and onRequest the body is undefined
+      preHandler: limitLogin,
       schema: {
         body: LoginBody,
         response: { 200: PublicUser, 401: Problem, ...problemResponse },

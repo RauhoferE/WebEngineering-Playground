@@ -90,7 +90,6 @@ export function buildApp(
     void app.register(swaggerUi, { routePrefix: '/api/docs' });
   }
 
-  // Minimal mapping: Task 4 turns this into application/problem+json
   app.setErrorHandler((err, req, reply) => {
     const p = toProblem(err, req);
     if (p.status >= 500) {

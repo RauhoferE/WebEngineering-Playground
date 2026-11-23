@@ -27,7 +27,9 @@ export const Env = z.object({
     .default('development'),
   JWT_SECRET: z.string().min(32),
   JWT_TTL_SECONDS: z.coerce.number().int().positive().default(3600),
-  TRUST_PROXY: z.boolean().default(false),
+  // Which proxies may set X-Forwarded-For: "uniquelocal" (Docker network), "loopback" or
+  // IPs/CIDRs, comma-separated. Unset: the header is ignored and cannot be spoofed.
+  TRUST_PROXY: z.string().trim().min(1).optional(),
   APP_VERSION: z.string().default('dev'),
 });
 

@@ -1,1 +1,6 @@
+if command -v gitleaks >/dev/null 2>&1; then
+  gitleaks git --pre-commit --staged --redact
+else
+  echo "gitleaks not installed: secret scan skipped (CI still runs it)" >&2
+fi
 npx lint-staged

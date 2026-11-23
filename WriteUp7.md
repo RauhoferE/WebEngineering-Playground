@@ -61,3 +61,36 @@ A Bearer header set by JavaScript is immune to CSRF but exposed to XSS. That’s
   - The client is under the attacker's control: curl, DevTools, editing `user.role` in React state, or replaying a request from the network tab.
   - The hidden button is UX: it avoids offering an action that would fail.
   - The 401/204/403/204 matrix only holds because the server checks every request.
+
+## Task 4
+
+**Mapping to the OWASP Top 10 (2025):**
+
+| Measure | Addresses |
+|---|---|
+| Login/register rate limits | **A07** Authentication Failures (brute force, credential stuffing), **A06** Insecure Design ("no rate limit by design") |
+| helmet, CSP, no Swagger in prod | **A02** Security Misconfiguration; CSP is also the second layer against stored XSS (**A05** Injection) |
+| Strict CORS, `.strict()` bodies | **A01** Broken Access Control (CORS `*`, role in the body / mass assignment) |
+| Body limit, zod everywhere | **A06** (a 10 MB body is a DoS), **A05** (shrinks the input, but doesn't replace parameterised queries), **A08** (untrusted JSON stays out of trusted paths) |
+| Env validation, fail fast | **A02**, **A10** Mishandling of Exceptional Conditions (fails closed instead of running with an empty secret) |
+| Secrets in env, gitleaks, rotation | **A04** Cryptographic Failures (secrets in git) |
+| Lockfile + `npm ci` (already in CI) | **A03** Supply Chain |
+| `warn` log on 429 | **A09** Logging and Alerting |
+
+**Fixed window vs token bucket:**
+- **Fixed window** (what `@fastify/rate-limit` does):
+  - one counter per key, reset at the end of each window;
+  - simple, O(1) memory;
+  - but at the window boundary you get up to **2 × max** in a short time: 5 guesses at 0:59 and 5 more at 1:00.
+- **Token bucket:**
+  - a capacity of *b* tokens, refilled at *r* per second;
+  - each request takes one token, and an empty bucket gives 429;
+  - bursts of up to *b* are allowed, the average stays at *r*, and there's no boundary effect;
+  - it stores a token count and the last refill time.
+- **Why fixed window is acceptable for login:** the limit is small, and the second, per-IP bucket caps the total anyway.
+
+**Defence in depth:** several independent layers, so that no single mistake is enough. For this API:
+- **Brute force:** argon2id makes each guess slow → rate limits → passwords of at least 12 characters → no account enumeration.
+- **Stored XSS:** React escapes text → CSP → the HttpOnly cookie isn't worth stealing.
+- **IDOR:** the policy → the ownership check in the `WHERE` clause.
+- **CSRF:** SameSite=Lax → the CORS allow-list.

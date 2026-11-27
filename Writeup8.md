@@ -156,3 +156,40 @@ To test this you need atleast 2 accounts
   and load the event from the table) or Redis pub/sub.
 
 ## Task 4
+
+### Check background workers
+
+```bash
+# watch the table in a second terminal
+watch -n1 "docker compose exec -T db psql -U bears bears -c \"SELECT id, type, status, attempts, run_at, locked_at, last_error FROM jobs ORDER BY id DESC LIMIT 5;\""
+
+npm run worker  
+
+# Always fail jobs end in 3 attempts 
+docker compose exec db psql -U bears bears -c "INSERT INTO jobs (type, payload) VALUES ('always-fails', '{}');"
+
+# Kill worker mid hob and check if job still completes 
+WORKER_DEMO_DELAY_MS=15000 JOB_VISIBILITY_TIMEOUT_SECONDS=30 npm run worker
+# run the UPDATE from 1.; while the job is "running":
+pkill -9 -f src/worker.ts
+JOB_VISIBILITY_TIMEOUT_SECONDS=30 npm run worker
+```
+
+### Questions 
+
+- **Why not in the request?** Latency: the user would wait for work that is not part of the answer. Reliability: a crash
+  after the response loses the follow-up work; an upstream outage (Wikipedia) fails a request whose data was fine.
+  Retries: a request has no place to retry in 10 minutes; a queue has. Load shaping: bursts become a queue, and the worker
+  runs at its own pace and scales on its own.
+- **At-least-once vs at-most-once:** at-most-once = mark done, then work: a crash in between loses the job. At-least-once
+  = work, then mark done: a crash in between runs it again. There is no order without a gap. Ours is at-least-once; the
+  upsert and "done" commit in one transaction (exactly-once inside the database), and the upsert is idempotent anyway.
+- **Why SKIP LOCKED:** without `FOR UPDATE`, two workers both read job 1 and both run it. With `FOR UPDATE` alone it is
+  correct, but worker 2 waits on job 1's lock, so the workers run one after another. `SKIP LOCKED` makes worker 2 take
+  the next free row.
+- **Visibility timeout:** a claimed job is a lease (`running` + `locked_at`). If the worker dies, nobody marks it done or
+  failed; after the timeout it goes back to `queued`. It must be longer than the slowest normal run, or a healthy job runs
+  twice. SQS uses the same name.
+- **When a broker (BullMQ + Redis, RabbitMQ):** much higher throughput than one polled table, fan-out to many consumers,
+  routing, consumers in other languages, or the team already runs one. The price: enqueueing is no longer in the same
+  transaction as the business write, and there is one more service to run. For the bear API the table is enough.

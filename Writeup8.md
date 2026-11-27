@@ -127,3 +127,7 @@ curl -s http://localhost:3000/metrics | grep 'cache="wikipedia"'
 - **Stampede:** an entry expires, 50 requests miss at once and 50 identical loads hit the database or Wikipedia. Coalescing (single flight) makes the first miss load and everyone else await the same promise. A failed load stores nothing, and every waiter gets the error.
 - **When to move to Redis:** when instances must agree on one copy, when the data outgrows process memory, or when a warm cache must survive a deploy. The cost is a network hop, serialisation and one more service to run.
 - **Several API instances:** each has its own LRU, so N cold starts and N loads. `NOTIFY` does reach every instance that `LISTEN`s, but each keeps its own copy and generation. The rate-limit counters are per instance too.
+
+## Task 3
+
+### Bus Route explanation

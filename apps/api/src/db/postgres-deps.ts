@@ -11,6 +11,7 @@ import { DrizzleUserRepository } from '../repositories/drizlle/user-repository.j
 import { DrizzleRevokeTokenRepository } from '../repositories/drizlle/revoke-token-repository.js';
 import { listenForBearChanges } from './bears-changed.js';
 import type pg from 'pg';
+import { DrizzleCommentEventRepository } from '../repositories/drizlle/comment-event-repository.js';
 
 export function createPostgresDeps(env: Env, log: FastifyBaseLogger): AppDeps {
   // Create connection pool
@@ -52,5 +53,6 @@ function createRepos(executor: Executor): Repos {
     comments: new DrizzleCommentRepository(executor),
     users: new DrizzleUserRepository(executor),
     revokedTokens: new DrizzleRevokeTokenRepository(executor),
+    commentEvents: new DrizzleCommentEventRepository(executor),
   };
 }

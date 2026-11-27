@@ -9,6 +9,7 @@ import { Env } from '../schemas/env.js';
 import { Problem } from '../schemas/problem.js';
 import { MemoryRevokeTokenRepository } from '../repositories/memory/revoke-token-repository.js';
 import { TokenService } from '../services/token-service.js';
+import { MemoryCommentEventRepository } from '../repositories/memory/comment-event-repository.js';
 
 const env = Env.parse({
   DATABASE_URL: 'postgres://unused@localhost/unused',
@@ -27,6 +28,7 @@ function testDeps(users: MemoryUserRepository): AppDeps {
     comments: new MemoryCommentRepository(steppingClock()),
     users,
     revokedTokens: new MemoryRevokeTokenRepository(),
+    commentEvents: new MemoryCommentEventRepository(),
   };
   return {
     repos,

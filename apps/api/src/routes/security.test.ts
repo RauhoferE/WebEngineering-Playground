@@ -9,6 +9,7 @@ import { MemoryRevokeTokenRepository } from '../repositories/memory/revoke-token
 import { MemoryUserRepository } from '../repositories/memory/user-repository.js';
 import { Env } from '../schemas/env.js';
 import { Problem } from '../schemas/problem.js';
+import { MemoryCommentEventRepository } from '../repositories/memory/comment-event-repository.js';
 
 type App = ReturnType<typeof buildApp>;
 
@@ -31,6 +32,7 @@ function testDeps(): AppDeps {
     comments: new MemoryCommentRepository(),
     users: new MemoryUserRepository(),
     revokedTokens: new MemoryRevokeTokenRepository(),
+    commentEvents: new MemoryCommentEventRepository(),
   };
   return {
     repos,

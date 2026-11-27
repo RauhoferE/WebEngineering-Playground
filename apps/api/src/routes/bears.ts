@@ -2,7 +2,7 @@ import type { FastifyPluginAsyncZod } from '@fastify/type-provider-zod';
 import { z } from 'zod';
 import { Bear, BearId, BearList } from '../schemas/bear.js';
 import type { BearService } from '../services/bear-service.js';
-import { problemResponse } from '../schemas/problem.js';
+import { Problem, problemResponse } from '../schemas/problem.js';
 import { currentUser, type RequireAuth } from '../plugins/auth.js';
 import { can, enforce } from '../auth/policy.js';
 

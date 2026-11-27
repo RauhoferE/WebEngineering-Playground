@@ -24,7 +24,7 @@ export class BearService {
     private readonly source: BearSource
   ) {}
 
-  async list(query: { q: string | undefined }): Promise<Bear[]> {
+  async list({ q }: { q: string | undefined }): Promise<Bear[]> {
     const key = `bears:list:g${this.generation}:q=${(q ?? '').toLowerCase()}`;
     return await this.lists.get(key, async () => await this.bears.list({ q }));
   }

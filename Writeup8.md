@@ -29,7 +29,7 @@ curl -si -b /tmp/jar http://localhost:3000/api/auth/me | grep -iE '^(cache-contr
 
 ## Questions
 
-**Library choice** (slide 54 asks you to explain libraries you use): `@fastify/etag` handles hashing and the 304; your own hook handles `Cache-Control`. The plugin doesn't set caching policy, and that policy is what keeps personal data out of shared caches.
+**Library choice**: `@fastify/etag` handles hashing and the 304; your own hook handles `Cache-Control`. The plugin doesn't set caching policy, and that policy is what keeps personal data out of shared caches.
 - **Freshness vs validation:** while fresh (`max-age`), a cache answers without asking. Once stale, it asks with `If-None-Match` and gets a 304 with no body. Validation saves bytes, not work: the query and `JSON.stringify` still run before the hash. A version-based ETag (a counter bumped on seed or refresh) could answer 304 before loading anything, and Task 2's cache makes the work itself cheap.
 - **private vs public:** `public` lets CDNs and proxies share one copy. `private` means only the user's own browser. Shared caches skip requests with `Authorization`, but there's no such rule for **cookies**, so anything cookie-based must be `private`. That's why the default is `private, no-store`.
 - **no-store vs no-cache:** `no-store` means never write it down (secrets, `/api/auth/me`). `no-cache` means you may store it but must revalidate every time (comments: always current, cheap 304s).
@@ -44,12 +44,13 @@ curl -si -b /tmp/jar http://localhost:3000/api/auth/me | grep -iE '^(cache-contr
   | network-first | `no-cache` + ETag (your comments) |
   | network-only | `no-store` (auth) |
 
-- **Trade-off:** a changed bear can be up to 60 s old (plus 300 s with SWR). That's acceptable for a species list, not for comments.
-- **Slide 17 question:** a shared cache must never store `/api/auth/me` or the POST, and `/api/auth/me` shouldn't even be cached by the browser (`no-store`). Same for `/health/ready`, and the SSE stream gets `no-cache`.
 
 ## Task 2
 
-### Times 
+### Times Before cache
+
+To Benchmark use 
+> BENCH_DISABLE_RATE_LIMIT=true npm run dev:api > /tmp/api.log 2>&1
 
 ```
 ┌─────────┬──────┬──────┬───────┬───────┬─────────┬─────────┬───────┐
@@ -65,3 +66,62 @@ curl -si -b /tmp/jar http://localhost:3000/api/auth/me | grep -iE '^(cache-contr
 │ Bytes/Sec │ 8.09 MB │ 8.09 MB │ 19.2 MB │ 19.8 MB │ 18.5 MB │ 2.75 MB │ 8.08 MB │
 └───────────┴─────────┴─────────┴─────────┴─────────┴─────────┴─────────┴─────────┘
 ```
+
+### Times after cache 
+
+```bash
+┌─────────┬──────┬──────┬───────┬──────┬─────────┬─────────┬───────┐
+│ Stat    │ 2.5% │ 50%  │ 97.5% │ 99%  │ Avg     │ Stdev   │ Max   │
+├─────────┼──────┼──────┼───────┼──────┼─────────┼─────────┼───────┤
+│ Latency │ 4 ms │ 4 ms │ 7 ms  │ 9 ms │ 4.48 ms │ 1.01 ms │ 22 ms │
+└─────────┴──────┴──────┴───────┴──────┴─────────┴─────────┴───────┘
+┌───────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┐
+│ Stat      │ 1%      │ 2.5%    │ 50%     │ 97.5%   │ Avg     │ Stdev   │ Min     │
+├───────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┤
+│ Req/Sec   │ 8,991   │ 8,991   │ 9,839   │ 10,023  │ 9,738.8 │ 265.47  │ 8,987   │
+├───────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┤
+│ Bytes/Sec │ 34.3 MB │ 34.3 MB │ 37.5 MB │ 38.2 MB │ 37.1 MB │ 1.01 MB │ 34.3 MB │
+└───────────┴─────────┴─────────┴─────────┴─────────┴─────────┴─────────┴─────────┘
+```
+
+### Check with Curl
+
+```bash
+npx autocannon -c 50 -a 50 http://localhost:3000/api/bears
+curl -s http://localhost:3000/metrics | grep '^cache_'
+#cache_lookups_total{cache="bears_list",result="miss"} 1
+#cache_lookups_total{cache="bears_list",result="inflight"} 49
+# HELP cache_loads_total Loads that actually reached the database or Wikipedia
+# TYPE cache_loads_total counter
+#cache_loads_total{cache="bears_list"} 1
+# 
+npm run bench
+curl -s http://localhost:3000/metrics | grep '^cache_'
+#cache_lookups_total{cache="bears_list",result="miss"} 1
+#cache_lookups_total{cache="bears_list",result="inflight"} 98
+#cache_lookups_total{cache="bears_list",result="stale"} 1
+#cache_lookups_total{cache="bears_list",result="hit"} 250
+# HELP cache_loads_total Loads that actually reached the database or Wikipedia
+# TYPE cache_loads_total counter
+#cache_loads_total{cache="bears_list"} 2
+```
+
+Check cache loads of wikipedia 
+
+```bash
+curl -s -c /tmp/mod -H 'content-type: application/json' \
+  -d '{"email":"moderator@bears.example","password":"Password123!"}' http://localhost:3000/api/auth/login
+TOKEN=$(awk '$6=="token"{print $7}' /tmp/mod)
+npx autocannon -c 50 -a 50 -m POST -H "Cookie: token=$TOKEN" http://localhost:3000/api/bears/refresh
+curl -s http://localhost:3000/metrics | grep 'cache="wikipedia"' 
+cache_lookups_total{cache="wikipedia",result="miss"} 1
+cache_lookups_total{cache="wikipedia",result="inflight"} 49
+cache_loads_total{cache="wikipedia"} 1
+```
+### Questions
+**Libraries:** `lru-cache` handles storage, TTL, `max` and coalescing; `prom-client` provides the counters and `/metrics`; PostgreSQL `LISTEN`/`NOTIFY` delivers invalidation across processes; `autocannon` does the measurement.
+- **Cache-aside vs read-through:** in cache-aside, the service checks the cache, loads on a miss and stores the result. In read-through, the cache owns a loader. `lru-cache`'s `fetchMethod` is technically read-through, but the service passes its own loader on each call and owns the key and the invalidation. So it behaves like cache-aside, with coalescing included.
+- **TTL vs event-based invalidation:** you use both. A refresh or seed bumps the generation, via `NOTIFY`, for near-zero staleness. The 60 s TTL catches what events miss: a direct SQL edit, or a dropped listener connection.
+- **Stampede:** an entry expires, 50 requests miss at once and 50 identical loads hit the database or Wikipedia. Coalescing (single flight) makes the first miss load and everyone else await the same promise. A failed load stores nothing, and every waiter gets the error.
+- **When to move to Redis:** when instances must agree on one copy, when the data outgrows process memory, or when a warm cache must survive a deploy. The cost is a network hop, serialisation and one more service to run.
+- **Several API instances:** each has its own LRU, so N cold starts and N loads. `NOTIFY` does reach every instance that `LISTEN`s, but each keeps its own copy and generation. The rate-limit counters are per instance too.

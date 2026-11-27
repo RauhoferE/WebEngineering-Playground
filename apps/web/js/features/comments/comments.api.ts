@@ -22,7 +22,8 @@ export async function fetchComments(
 
 export async function createComment(
   bearId: string,
-  comment: { text: string }
+  comment: { text: string },
+  idempotencyKey: string
 ): Promise<CommentEntry> {
   const res = await fetch(
     `${apiBase}/api/bears/${encodeURIComponent(bearId)}/comments`,
@@ -32,6 +33,7 @@ export async function createComment(
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
+        'Idempotency-Key': idempotencyKey,
       },
       body: JSON.stringify(comment),
     }

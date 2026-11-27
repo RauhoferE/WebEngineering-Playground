@@ -33,6 +33,7 @@ export function Comments({ bearId }: { bearId: string }): ReactElement {
   useCommentStream(bearId, setComments);
   // Focus target after a delete, so keyboard users do not land at the top of the page
   const listHeadingRef = useRef<HTMLHeadingElement>(null);
+  const pending = useRef<{ text: string; key: string } | null>(null);
 
   // First page; aborted if the component unmounts before the answer arrives
   useEffect(() => {
@@ -85,8 +86,12 @@ export function Comments({ bearId }: { bearId: string }): ReactElement {
   };
 
   const handleCreate = async (comment: { text: string }): Promise<void> => {
+    if (pending.current?.text !== comment.text) {
+      pending.current = { text: comment.text, key: crypto.randomUUID() };
+    }
     try {
-      const created = await createComment(bearId, comment);
+      const created = await createComment(bearId, comment, pending.current.key);
+      pending.current = null; // done: the next comment is a new intent
       // Newest first, so a new comment goes on top
       setComments((previous) => [created, ...previous]);
     } catch (error: unknown) {

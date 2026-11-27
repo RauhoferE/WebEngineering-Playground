@@ -193,3 +193,21 @@ JOB_VISIBILITY_TIMEOUT_SECONDS=30 npm run worker
 - **When a broker (BullMQ + Redis, RabbitMQ):** much higher throughput than one polled table, fan-out to many consumers,
   routing, consumers in other languages, or the team already runs one. The price: enqueueing is no longer in the same
   transaction as the business write, and there is one more service to run. For the bear API the table is enough.
+
+## Task 5
+
+### Questions
+
+### Questions
+- **Why is exactly-once delivery impossible end to end?** After a timeout the sender cannot tell "request lost" from
+  "done, answer lost". Every acknowledgement can be lost as well, so no extra message settles it. The sender can only
+  choose: don't retry (at-most-once, the action may be lost) or retry (at-least-once, it may happen twice).
+- **How do idempotent operations give the same guarantee?** Deliver at least once, and make duplicates harmless:
+  the effect happens exactly once even if the message arrives several times (effectively-once). Our POST stores the
+  first response under the key in the same transaction as the comment; every retry replays it instead of inserting again.
+- **Playground 4 (idempotent methods):** GET, PUT and DELETE are idempotent by definition, so browsers, proxies and
+  clients may retry them safely. POST is not: two POSTs create two comments. The Idempotency-Key gives POST the same
+  retry safety (the alternative would be a PUT to a client-chosen id).
+- **Task 4 (retries):** the queue delivers at least once: a worker that dies after the upsert but before "done" gets
+  its job re-run after the visibility timeout, and failures are retried with backoff. So the handler must be idempotent:
+  `refresh-bears` upserts on the natural key, and its effect and "done" commit in one transaction.

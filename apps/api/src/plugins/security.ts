@@ -13,7 +13,8 @@ export const LIMITS = {
 
 export function registerSecurity(
   app: FastifyInstance,
-  production: boolean
+  production: boolean,
+  globalLimit = true
 ): void {
   void app.register(helmet, {
     contentSecurityPolicy: {
@@ -25,7 +26,7 @@ export function registerSecurity(
     },
   });
   void app.register(rateLimit, {
-    global: true,
+    global: globalLimit,
     ...LIMITS.api,
     errorResponseBuilder: (_req, context) =>
       new RateLimitedError(Math.ceil(context.ttl / 1000)),

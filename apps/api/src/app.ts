@@ -78,7 +78,9 @@ export function buildApp(
   });
 
   // Register rate limiting
-  registerSecurity(app, env.NODE_ENV === 'production');
+  const globalRateLimit =
+    env.NODE_ENV === 'production' || !env.BENCH_DISABLE_RATE_LIMIT;
+  registerSecurity(app, env.NODE_ENV === 'production', globalRateLimit);
   registerHttpCache(app); // Cache-Control policy
   if (env.NODE_ENV !== 'production') {
     void app.register(swagger, {

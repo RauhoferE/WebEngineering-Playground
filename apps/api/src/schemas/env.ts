@@ -31,6 +31,8 @@ export const Env = z.object({
   // IPs/CIDRs, comma-separated. Unset: the header is ignored and cannot be spoofed.
   TRUST_PROXY: z.string().trim().min(1).optional(),
   APP_VERSION: z.string().default('dev'),
+  // Only for autocannon runs: turns the per-IP API limit off outside production
+  BENCH_DISABLE_RATE_LIMIT: z.stringbool().default(false),
 });
 
 export type Env = z.infer<typeof Env>;

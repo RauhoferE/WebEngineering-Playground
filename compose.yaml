@@ -3,9 +3,15 @@ services:
     build:
       context: .
       dockerfile: apps/api/Dockerfile
-    command: ['node', 'apps/api/dist/scripts/migrate.js']
+    # Every `docker compose up`: migrations, then the bears from Wikipedia (an upsert, so repeating is harmless).
+    # A failed seed (e.g. offline) must not keep the API from starting
+    command:
+      - sh
+      - -c
+      - node apps/api/dist/scripts/migrate.js && (node apps/api/dist/scripts/seed.js || echo 'seed failed, starting with the existing bears')
     environment:
       DATABASE_URL: postgres://${POSTGRES_USER:-bears}:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@db:5432/${POSTGRES_DB:-bears}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env} # loadEnv() requires it; the scripts don't use it
     depends_on:
       db:
         condition: service_healthy

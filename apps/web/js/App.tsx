@@ -9,6 +9,7 @@ import { Link, Route, Routes, useLocation } from 'react-router';
 import { BearDetail } from './features/bears/BearDetail';
 import { RegisterForm } from './features/auth/RegisterForm';
 import { LoginForm } from './features/auth/LoginForm';
+import { UserMenu } from './features/auth/UserMenu';
 
 function pageTitle(pathname: string): string {
   if (pathname === '/') return 'The trouble with Bears';
@@ -63,6 +64,7 @@ export default function App(): ReactElement {
       </a>
       <Header title="Welcome to our wildlife website" />
       <NavBar links={links} />
+      <UserMenu />
 
       <main id="main" tabIndex={-1} ref={mainRef}>
         <Routes>

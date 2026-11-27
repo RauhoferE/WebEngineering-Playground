@@ -12,6 +12,7 @@ import { Problem, problemResponse } from '../schemas/problem.js';
 import { currentUser, type RequireAuth } from '../plugins/auth.js';
 import type { CommentBus } from '../events/comment-bus.js';
 import type { CommentEvent } from '../repositories/comment-event-repository.js';
+import { createHash } from 'node:crypto';
 
 export interface CommentRouteOptions {
   comments: CommentService;
@@ -27,6 +28,13 @@ const MAX_BUFFERED_BYTES = 1_048_576;
 const StreamQuery = z.object({
   // Set by reconnecting-eventsource when it had to open a new EventSource (e.g. after a 502)
   lastEventId: z.coerce.number().int().min(0).optional(),
+});
+
+const IdempotencyHeaders = z.looseObject({
+  'idempotency-key': z
+    .string()
+    .regex(/^[\w-]{8,64}$/)
+    .optional(), // optional for this route
 });
 
 export const commentRoutes: FastifyPluginAsyncZod<CommentRouteOptions> = async (
@@ -52,15 +60,33 @@ export const commentRoutes: FastifyPluginAsyncZod<CommentRouteOptions> = async (
       preHandler: requireAuth,
       schema: {
         params: z.object({ id: BearId }),
+        headers: IdempotencyHeaders,
         body: NewComment,
-        response: { 201: Comment, 401: Problem, ...problemResponse },
+        response: {
+          201: Comment,
+          401: Problem,
+          422: Problem,
+          ...problemResponse,
+        },
       },
     },
     async (req, reply) => {
+      const key = req.headers['idempotency-key'];
+      const idem =
+        typeof key === 'string'
+          ? {
+              key,
+              // Same key with another method, URL or body → 422
+              fingerprint: createHash('sha256')
+                .update(`${req.method} ${req.url} ${JSON.stringify(req.body)}`)
+                .digest('hex'),
+            }
+          : undefined;
       const comment = await comments.create(
         req.params.id,
         req.body,
-        currentUser(req)
+        currentUser(req),
+        idem
       );
       return await reply
         .code(201)

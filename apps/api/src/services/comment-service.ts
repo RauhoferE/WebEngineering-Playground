@@ -3,7 +3,11 @@ import {
   type Comment,
   type NewComment,
 } from '../schemas/comment.js';
-import { InvalidCursorError, NotFoundError } from '../schemas/errors.js';
+import {
+  IdempotencyKeyReusedError,
+  InvalidCursorError,
+  NotFoundError,
+} from '../schemas/errors.js';
 import type { BearService } from './bear-service.js';
 import type { CommentRepository } from '../repositories/comment-repository.js';
 import { decodeCursor, encodeCursor } from '../schemas/cursor.js';
@@ -69,12 +73,31 @@ export class CommentService {
   async create(
     bearId: string,
     input: NewComment,
-    user: User
+    user: User,
+    idem?: { key: string; fingerprint: string }
   ): Promise<Comment> {
     enforce(can(user, 'comment:create'));
     await this.bears.get(bearId); // 404 for unknown bears
+    // Key, comment, event and stored response: one transaction, all or nothing
     const { comment, event } = await this.uow.run(
-      async ({ comments, commentEvents }) => {
+      async ({ comments, commentEvents, idempotencyKeys }) => {
+        if (idem !== undefined) {
+          const fresh = await idempotencyKeys.claim(
+            user.id,
+            idem.key,
+            idem.fingerprint
+          );
+          if (!fresh) {
+            const saved = await idempotencyKeys.find(user.id, idem.key);
+            if (saved?.fingerprint !== idem.fingerprint) {
+              throw new IdempotencyKeyReusedError(); // 422
+            }
+            if (saved.response === null) {
+              throw new Error('idempotency key without response'); // can't happen: saved in the same transaction
+            }
+            return { comment: saved.response, event: null }; // replay: no new comment, no new event
+          }
+        }
         const comment = await comments.create(bearId, {
           text: input.text,
           author: displayName(user),
@@ -84,10 +107,13 @@ export class CommentService {
           type: 'comment.created',
           data: comment,
         });
+        if (idem !== undefined) {
+          await idempotencyKeys.saveResponse(user.id, idem.key, comment);
+        }
         return { comment, event };
       }
     );
-    this.bus.publish(event); // only after COMMIT: never push a rolled-back comment
+    if (event !== null) this.bus.publish(event); // only after COMMIT
     return comment;
   }
 

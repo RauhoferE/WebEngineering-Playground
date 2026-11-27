@@ -76,7 +76,12 @@ export function buildApp(
   void app.register(cors, {
     origin: env.CORS_ORIGINS, // allow-list, never "*" or reflecting every origin
     methods: ['GET', 'POST', 'DELETE'],
-    allowedHeaders: ['content-type', 'x-request-id', 'last-event-id'],
+    allowedHeaders: [
+      'content-type',
+      'x-request-id',
+      'last-event-id',
+      'idempotency-key',
+    ],
     exposedHeaders: ['location', 'x-request-id', 'retry-after'],
     credentials: true, // the auth cookie must travel with cross-origin requests (frontend on :4173)
     maxAge: 600, // browser may cache the preflight for 10 minutes

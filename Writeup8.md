@@ -89,11 +89,12 @@ To Benchmark use
 ```bash
 npx autocannon -c 50 -a 50 http://localhost:3000/api/bears
 curl -s http://localhost:3000/metrics | grep '^cache_'
-#cache_lookups_total{cache="bears_list",result="miss"} 1
-#cache_lookups_total{cache="bears_list",result="inflight"} 49
+# Cache before postgres 
+#cache_lookups_total{cache="bears_list",result="miss"} 1 <- request 1 found nothing and started fetch 
+#cache_lookups_total{cache="bears_list",result="inflight"} 49 <- others wait on fetch 
 # HELP cache_loads_total Loads that actually reached the database or Wikipedia
 # TYPE cache_loads_total counter
-#cache_loads_total{cache="bears_list"} 1
+#cache_loads_total{cache="bears_list"} 1 <- was only fetched once
 # 
 npm run bench
 curl -s http://localhost:3000/metrics | grep '^cache_'
@@ -114,9 +115,10 @@ curl -s -c /tmp/mod -H 'content-type: application/json' \
 TOKEN=$(awk '$6=="token"{print $7}' /tmp/mod)
 npx autocannon -c 50 -a 50 -m POST -H "Cookie: token=$TOKEN" http://localhost:3000/api/bears/refresh
 curl -s http://localhost:3000/metrics | grep 'cache="wikipedia"' 
-cache_lookups_total{cache="wikipedia",result="miss"} 1
-cache_lookups_total{cache="wikipedia",result="inflight"} 49
-cache_loads_total{cache="wikipedia"} 1
+# Cache for wikipedia call 
+#cache_lookups_total{cache="wikipedia",result="miss"} 1
+#cache_lookups_total{cache="wikipedia",result="inflight"} 49
+#cache_loads_total{cache="wikipedia"} 1
 ```
 ### Questions
 **Libraries:** `lru-cache` handles storage, TTL, `max` and coalescing; `prom-client` provides the counters and `/metrics`; PostgreSQL `LISTEN`/`NOTIFY` delivers invalidation across processes; `autocannon` does the measurement.

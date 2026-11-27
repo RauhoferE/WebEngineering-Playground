@@ -33,6 +33,8 @@ import { registerSecurity } from './plugins/security.js';
 import { registerHttpCache } from './plugins/http-cache.js';
 import { registerMetrics } from './plugins/metrics.js';
 import { fetchBearsFromWikipedia } from './services/bear-source.js';
+import { CommentBus } from './events/comment-bus.js';
+import sse from '@fastify/sse';
 
 export interface AppDeps {
   repos: Repos;
@@ -74,7 +76,7 @@ export function buildApp(
   void app.register(cors, {
     origin: env.CORS_ORIGINS, // allow-list, never "*" or reflecting every origin
     methods: ['GET', 'POST', 'DELETE'],
-    allowedHeaders: ['content-type', 'x-request-id'],
+    allowedHeaders: ['content-type', 'x-request-id', 'last-event-id'],
     exposedHeaders: ['location', 'x-request-id', 'retry-after'],
     credentials: true, // the auth cookie must travel with cross-origin requests (frontend on :4173)
     maxAge: 600, // browser may cache the preflight for 10 minutes
@@ -86,6 +88,7 @@ export function buildApp(
   registerSecurity(app, env.NODE_ENV === 'production', globalRateLimit);
   registerHttpCache(app); // Cache-Control policy
   registerMetrics(app);
+  void app.register(sse, { heartbeatInterval: 15_000 });
   if (env.NODE_ENV !== 'production') {
     void app.register(swagger, {
       openapi: {
@@ -155,7 +158,12 @@ export function buildApp(
   deps.onBearsChanged?.(() => {
     bears.invalidate();
   });
-
+  // One bus per app instance: tests get their own, production has one per process
+  const bus = new CommentBus();
+  // Fastify doesn't force-close active connections: without this, app.close() waits for every open stream
+  app.addHook('preClose', async () => {
+    bus.shutdown();
+  });
   const auth = new AuthService(
     deps.repos.users,
     deps.repos.revokedTokens,
@@ -172,9 +180,12 @@ export function buildApp(
       deps.repos.comments,
       bears,
       deps.uow,
-      env.REPORT_MODE
+      env.REPORT_MODE,
+      deps.repos.commentEvents,
+      bus
     ),
     requireAuth,
+    bus,
   });
   void app.register(authRoutes, {
     auth,

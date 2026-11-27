@@ -22,7 +22,8 @@
     "test": "npm run test -ws --if-present",
     "db:seed:comments": "npm run db:seed:comments -w apps/api",
     "db:seed:moderator": "npm run db:seed:moderator -w apps/api",
-    "report:storm": "npm run report:storm -w apps/api"
+    "report:storm": "npm run report:storm -w apps/api",
+    "bench": "autocannon -c 50 -d 20 http://localhost:3000/api/bears"
   },
   "lint-staged": {
     "*.{ts,tsx,js}": [
@@ -36,6 +37,7 @@
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
+    "autocannon": "^9.0.0",
     "concurrently": "^9.0.0",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^10.1.8",

@@ -155,6 +155,7 @@ export function buildApp(
   deps.onBearsChanged?.(() => {
     bears.invalidate();
   });
+
   const auth = new AuthService(
     deps.repos.users,
     deps.repos.revokedTokens,

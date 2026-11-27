@@ -10,6 +10,11 @@ import { decodeCursor, encodeCursor } from '../schemas/cursor.js';
 import type { UnitOfWork } from '../repositories/unit-of-work.js';
 import { type User } from '../repositories/user-repository.js';
 import { type Actor, can, enforce } from '../auth/policy.js';
+import {
+  type CommentEvent,
+  type CommentEventRepository,
+} from '../repositories/comment-event-repository.js';
+import { type CommentBus } from '../events/comment-bus.js';
 
 export type ReportMode = 'naive' | 'transaction' | 'locked';
 
@@ -18,7 +23,9 @@ export class CommentService {
     private readonly comments: CommentRepository,
     private readonly bears: BearService,
     private readonly uow: UnitOfWork,
-    private readonly reportMode: ReportMode
+    private readonly reportMode: ReportMode,
+    private readonly events: CommentEventRepository,
+    private readonly bus: CommentBus
   ) {}
 
   async get(id: string): Promise<Comment> {
@@ -66,20 +73,52 @@ export class CommentService {
   ): Promise<Comment> {
     enforce(can(user, 'comment:create'));
     await this.bears.get(bearId); // 404 for unknown bears
-    return await this.comments.create(bearId, {
-      text: input.text,
-      author: displayName(user),
-      authorId: user.id,
-    });
+    const { comment, event } = await this.uow.run(
+      async ({ comments, commentEvents }) => {
+        const comment = await comments.create(bearId, {
+          text: input.text,
+          author: displayName(user),
+          authorId: user.id,
+        });
+        const event = await commentEvents.append(bearId, {
+          type: 'comment.created',
+          data: comment,
+        });
+        return { comment, event };
+      }
+    );
+    this.bus.publish(event); // only after COMMIT: never push a rolled-back comment
+    return comment;
   }
 
   async delete(id: string, actor: Actor): Promise<void> {
     const comment = await this.comments.findById(id);
     if (comment === null) throw new NotFoundError(`No comment with id "${id}"`);
     enforce(can(actor, 'comment:delete', comment)); // 403: not yours
-    if (!(await this.comments.delete(id, actor))) {
-      throw new NotFoundError(`No comment with id "${id}"`);
-    }
+    const event = await this.uow.run(async ({ comments, commentEvents }) => {
+      if (!(await comments.delete(id, actor))) {
+        throw new NotFoundError(`No comment with id "${id}"`);
+      }
+      return await commentEvents.append(comment.bearId, {
+        type: 'comment.deleted',
+        data: { id },
+      });
+    });
+    this.bus.publish(event);
+  }
+
+  // 404 for unknown bears; the stream route calls it before any SSE header is sent
+  async assertBear(bearId: string): Promise<void> {
+    await this.bears.get(bearId);
+  }
+
+  // Catch-up for a reconnecting client
+  async eventsSince(bearId: string, afterSeq: number): Promise<CommentEvent[]> {
+    return await this.events.since(bearId, afterSeq);
+  }
+
+  async currentSeq(bearId: string): Promise<number> {
+    return await this.events.currentSeq(bearId);
   }
 }
 

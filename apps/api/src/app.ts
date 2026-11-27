@@ -5,6 +5,7 @@ import {
   serializerCompiler,
   validatorCompiler,
 } from '@fastify/type-provider-zod';
+import etag from '@fastify/etag';
 import { randomUUID } from 'node:crypto';
 import {
   NotReadyError,
@@ -29,6 +30,7 @@ import { AuthService } from './services/auth-service.js';
 import { TokenService } from './services/token-service.js';
 import { createRequireAuth } from './plugins/auth.js';
 import { registerSecurity } from './plugins/security.js';
+import { registerHttpCache } from './plugins/http-cache.js';
 
 export interface AppDeps {
   repos: Repos;
@@ -77,7 +79,7 @@ export function buildApp(
 
   // Register rate limiting
   registerSecurity(app, env.NODE_ENV === 'production');
-
+  registerHttpCache(app); // Cache-Control policy
   if (env.NODE_ENV !== 'production') {
     void app.register(swagger, {
       openapi: {
@@ -147,6 +149,7 @@ export function buildApp(
   );
   const requireAuth = createRequireAuth(auth);
 
+  void app.register(etag); // ETag + 304 for every response
   void app.register(cookie);
   app.decorateRequest('user', null);
   void app.register(bearRoutes, { bears });

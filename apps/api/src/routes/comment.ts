@@ -23,6 +23,7 @@ export const commentRoutes: FastifyPluginAsyncZod<CommentRouteOptions> = async (
   app.get(
     '/api/bears/:id/comments',
     {
+      config: { cache: 'revalidate' },
       schema: {
         params: z.object({ id: BearId }),
         querystring: CommentPageQuery,
@@ -78,6 +79,7 @@ export const commentRoutes: FastifyPluginAsyncZod<CommentRouteOptions> = async (
   app.get(
     '/api/comments/:commentId',
     {
+      config: { cache: 'revalidate' },
       schema: {
         params: z.object({ commentId: z.uuid() }),
         response: { 200: Comment, ...problemResponse },

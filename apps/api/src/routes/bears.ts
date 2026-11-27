@@ -11,6 +11,7 @@ export const bearRoutes: FastifyPluginAsyncZod<{ bears: BearService }> = async (
   app.get(
     '/api/bears',
     {
+      config: { cache: 'public' },
       schema: {
         querystring: z.object({
           q: z
@@ -29,6 +30,7 @@ export const bearRoutes: FastifyPluginAsyncZod<{ bears: BearService }> = async (
   app.get(
     '/api/bears/:id',
     {
+      config: { cache: 'public' },
       schema: {
         params: z.object({ id: BearId }),
         response: { 200: Bear, ...problemResponse },

@@ -43,6 +43,13 @@
       "when": 1795362295243,
       "tag": "0005_comments_author_id",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1795786269170,
+      "tag": "0006_comments_events",
+      "breakpoints": true
     }
   ]
 }

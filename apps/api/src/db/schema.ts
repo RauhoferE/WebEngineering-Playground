@@ -3,7 +3,9 @@ import {
   check,
   index,
   integer,
+  jsonb,
   pgTable,
+  primaryKey,
   text,
   timestamp,
   uuid,
@@ -20,6 +22,7 @@ export const bears = pgTable('bears', {
   fetchedAt: timestamp('fetched_at', { withTimezone: true })
     .notNull()
     .defaultNow(),
+  eventSeq: integer('event_seq').notNull().default(0),
 });
 
 export const comments = pgTable(
@@ -52,6 +55,24 @@ export const comments = pgTable(
     check('comments_text_len', sql`char_length(${t.text}) BETWEEN 1 AND 2000`),
     check('comments_report_count_nonneg', sql`${t.reportCount} >= 0`),
   ]
+);
+
+export const commentEvents = pgTable(
+  'comment_events',
+  {
+    bearId: text('bear_id')
+      .notNull()
+      .references(() => bears.id, { onDelete: 'cascade' }),
+    seq: integer('seq').notNull(),
+    type: text('type', {
+      enum: ['comment.created', 'comment.deleted'],
+    }).notNull(),
+    payload: jsonb('payload').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true, precision: 3 })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.bearId, t.seq] })]
 );
 
 export const users = pgTable(

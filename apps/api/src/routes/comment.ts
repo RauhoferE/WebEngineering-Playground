@@ -72,6 +72,8 @@ export const commentRoutes: FastifyPluginAsyncZod<CommentRouteOptions> = async (
     },
     async (req, reply) => {
       const key = req.headers['idempotency-key'];
+      // Either he sends a key or not both are valid
+      // If he sends a key we also create a fingerprint which is a summary of what the client wants to do
       const idem =
         typeof key === 'string'
           ? {

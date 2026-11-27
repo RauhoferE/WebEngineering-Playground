@@ -196,7 +196,11 @@ JOB_VISIBILITY_TIMEOUT_SECONDS=30 npm run worker
 
 ## Task 5
 
-### Questions
+### Explanation
+
+Idempotency is needed becuase of double sends (network drops, timeout, etc...)
+Client does not know if request worked and the comment might be created twice
+CHecking for Duplicate text does not work since he can write the same thing twice only a random key makes sure that the request is the same
 
 ### Questions
 - **Why is exactly-once delivery impossible end to end?** After a timeout the sender cannot tell "request lost" from

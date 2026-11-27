@@ -82,6 +82,9 @@ export class CommentService {
     const { comment, event } = await this.uow.run(
       async ({ comments, commentEvents, idempotencyKeys }) => {
         if (idem !== undefined) {
+          // tries to insert key into table
+          // Is fresh it successds
+          // If not then request is a repeat
           const fresh = await idempotencyKeys.claim(
             user.id,
             idem.key,
@@ -89,9 +92,11 @@ export class CommentService {
           );
           if (!fresh) {
             const saved = await idempotencyKeys.find(user.id, idem.key);
+            // If new request but same key then key is reused
             if (saved?.fingerprint !== idem.fingerprint) {
               throw new IdempotencyKeyReusedError(); // 422
             }
+            // Just a safety net - cant really happen
             if (saved.response === null) {
               throw new Error('idempotency key without response'); // can't happen: saved in the same transaction
             }

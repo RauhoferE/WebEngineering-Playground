@@ -1,5 +1,6 @@
 import { sql } from 'drizzle-orm';
 import {
+  bigint,
   check,
   index,
   integer,
@@ -103,4 +104,28 @@ export const revokedTokens = pgTable(
     expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
   },
   (t) => [index('revoked_tokens_expires_idx').on(t.expiresAt)]
+);
+
+export const jobs = pgTable(
+  'jobs',
+  {
+    id: bigint('id', { mode: 'number' })
+      .primaryKey()
+      .generatedAlwaysAsIdentity(),
+    type: text('type').notNull(),
+    payload: jsonb('payload').notNull(),
+    status: text('status', { enum: ['queued', 'running', 'done', 'dead'] })
+      .notNull()
+      .default('queued'),
+    attempts: integer('attempts').notNull().default(0),
+    runAt: timestamp('run_at', { withTimezone: true }).notNull().defaultNow(),
+    lockedAt: timestamp('locked_at', { withTimezone: true }),
+    lastError: text('last_error'),
+  },
+  // Partial index: only queued rows, so the claim stays fast however many done jobs pile up
+  (t) => [
+    index('jobs_ready')
+      .on(t.runAt)
+      .where(sql`status = 'queued'`),
+  ]
 );

@@ -50,6 +50,13 @@
       "when": 1795786269170,
       "tag": "0006_comments_events",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1795794531364,
+      "tag": "0007_tough_lockjaw",
+      "breakpoints": true
     }
   ]
 }

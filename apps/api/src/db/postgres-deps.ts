@@ -9,6 +9,8 @@ import type { Repos } from '../repositories/repos.js';
 import type { UnitOfWork } from '../repositories/unit-of-work.js';
 import { DrizzleUserRepository } from '../repositories/drizlle/user-repository.js';
 import { DrizzleRevokeTokenRepository } from '../repositories/drizlle/revoke-token-repository.js';
+import { listenForBearChanges } from './bears-changed.js';
+import type pg from 'pg';
 
 export function createPostgresDeps(env: Env, log: FastifyBaseLogger): AppDeps {
   // Create connection pool
@@ -25,6 +27,8 @@ export function createPostgresDeps(env: Env, log: FastifyBaseLogger): AppDeps {
     run: async (work) =>
       await db.transaction(async (tx) => await work(createRepos(tx))),
   };
+
+  let listener: pg.Client | undefined;
   // return correct implementation of repositories
   return {
     repos,
@@ -32,7 +36,11 @@ export function createPostgresDeps(env: Env, log: FastifyBaseLogger): AppDeps {
     ping: async () => {
       await pool.query('SELECT 1');
     },
+    onBearsChanged: (onChange) => {
+      listener = listenForBearChanges(env.DATABASE_URL, onChange, log);
+    },
     close: async () => {
+      await listener?.end();
       await pool.end();
     },
   };

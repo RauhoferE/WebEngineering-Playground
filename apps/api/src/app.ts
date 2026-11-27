@@ -32,12 +32,14 @@ import { createRequireAuth } from './plugins/auth.js';
 import { registerSecurity } from './plugins/security.js';
 import { registerHttpCache } from './plugins/http-cache.js';
 import { registerMetrics } from './plugins/metrics.js';
+import { fetchBearsFromWikipedia } from './services/bear-source.js';
 
 export interface AppDeps {
   repos: Repos;
   uow: UnitOfWork;
   ping: () => Promise<void>; // used by /health/ready
   close: () => Promise<void>; // runs in onClose
+  onBearsChanged?: (onChange: () => void) => void; // Listen for changed bears
 }
 
 export type CreateDeps = (env: Env, log: FastifyBaseLogger) => AppDeps;
@@ -145,7 +147,14 @@ export function buildApp(
   }
 
   // Assign bear service to const, so we can reuse it in the comment service, which needs to check if a bear exists before adding a comment
-  const bears = new BearService(deps.repos.bears);
+  const bears = new BearService(
+    deps.repos.bears,
+    async () => await fetchBearsFromWikipedia(env, app.log)
+  );
+  // A NOTIFY from any process drops this instance's cached lists
+  deps.onBearsChanged?.(() => {
+    bears.invalidate();
+  });
   const auth = new AuthService(
     deps.repos.users,
     deps.repos.revokedTokens,

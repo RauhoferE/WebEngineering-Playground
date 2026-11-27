@@ -11,6 +11,7 @@ import {
   timestamp,
   uuid,
 } from 'drizzle-orm/pg-core';
+import type { Comment } from '../schemas/comment.js';
 
 export const bears = pgTable('bears', {
   id: text('id').primaryKey(), // slug, e.g. "u-arctos"
@@ -128,4 +129,20 @@ export const jobs = pgTable(
       .on(t.runAt)
       .where(sql`status = 'queued'`),
   ]
+);
+
+export const idempotencyKeys = pgTable(
+  'idempotency_keys',
+  {
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    key: text('key').notNull(),
+    fingerprint: text('fingerprint').notNull(),
+    response: jsonb('response').$type<Comment>(), // null only inside the transaction that claimed the key
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.key] })] // per user: two users may pick the same key
 );

@@ -130,4 +130,29 @@ curl -s http://localhost:3000/metrics | grep 'cache="wikipedia"'
 
 ## Task 3
 
-### Bus Route explanation
+To test this you need atleast 2 accounts
+
+### Questions
+- **Polling, long polling, SSE, WebSockets:** Polling = a GET every N s: simple, but wasted requests and up to N s delay.
+  Long polling = a GET held open until data arrives: one request per event, a gap while reconnecting.
+  SSE = one never-ending HTTP response, server → client, `EventSource` built in with auto-reconnect and `Last-Event-ID`.
+  WebSockets = upgrade to a full-duplex channel with its own protocol, no built-in reconnect or resync.
+  Comments flow one way; writing stays a POST with validation, auth and idempotency. SSE is plain HTTP, so
+  cookies, CORS, helmet, nginx and the Vite proxy work unchanged, and resync comes for free. WebSockets pay off
+  only when the client talks back often (chat, cursors, games).
+- **Ordering per entity:** all events of one bear arrive in commit order; across bears there is no order, and nobody
+  can tell. `seq` is incremented under the bear's row lock in the comment transaction. It matters: `created 43`
+  after `deleted 44` would bring a deleted comment back. A `bigserial` is assigned at insert, not commit: 42 can
+  become visible before 41, and a client that saw 42 never gets 41. Total order would queue every write in
+  the system on one row.
+- **Slow consumer:** each connection has its own socket buffer; `write()` returns false when it is full, and
+  `@fastify/sse` waits for drain but doesn't limit how much piles up. Above 1 MiB queued, the server destroys that one connection
+  instead of buffering without limit or stalling the others. Nothing is lost: the client reconnects with `Last-Event-ID`
+  and catches up from `comment_events`.
+- **Two API instances:** the `EventEmitter` lives in one process. A POST handled by instance A reaches only A's
+  SSE clients; clients connected to B hear nothing until they reconnect. SSE connections stay on one instance, so the events
+  have to reach every instance: publish after commit to a shared channel and let each instance forward to its own clients:
+  PostgreSQL `LISTEN/NOTIFY` (as already used for `bears_changed`; payload < 8000 bytes, so send `bearId` + `seq`
+  and load the event from the table) or Redis pub/sub.
+
+## Task 4

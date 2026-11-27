@@ -10,6 +10,7 @@ import { Problem } from '../schemas/problem.js';
 import { MemoryRevokeTokenRepository } from '../repositories/memory/revoke-token-repository.js';
 import { TokenService } from '../services/token-service.js';
 import { MemoryCommentEventRepository } from '../repositories/memory/comment-event-repository.js';
+import { MemoryIdempotencyKeyRepository } from '../repositories/memory/idempotency-key-repository.js';
 
 const env = Env.parse({
   DATABASE_URL: 'postgres://unused@localhost/unused',
@@ -29,6 +30,7 @@ function testDeps(users: MemoryUserRepository): AppDeps {
     users,
     revokedTokens: new MemoryRevokeTokenRepository(),
     commentEvents: new MemoryCommentEventRepository(),
+    idempotencyKeys: new MemoryIdempotencyKeyRepository(),
   };
   return {
     repos,

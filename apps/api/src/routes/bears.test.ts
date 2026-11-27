@@ -8,6 +8,7 @@ import { MemoryCommentRepository } from '../repositories/memory/comment-reposito
 import { MemoryUserRepository } from '../repositories/memory/user-repository.js';
 import { MemoryRevokeTokenRepository } from '../repositories/memory/revoke-token-repository.js';
 import { MemoryCommentEventRepository } from '../repositories/memory/comment-event-repository.js';
+import { MemoryIdempotencyKeyRepository } from '../repositories/memory/idempotency-key-repository.js';
 
 const env = Env.parse({
   DATABASE_URL: 'postgres://unused@localhost/unused',
@@ -47,6 +48,7 @@ function setup(t: TestContext): ReturnType<typeof buildApp> {
       users: new MemoryUserRepository(),
       revokedTokens: new MemoryRevokeTokenRepository(),
       commentEvents: new MemoryCommentEventRepository(),
+      idempotencyKeys: new MemoryIdempotencyKeyRepository(),
     };
     return {
       repos,

@@ -10,6 +10,7 @@ import { MemoryUserRepository } from '../repositories/memory/user-repository.js'
 import { Env } from '../schemas/env.js';
 import { Problem } from '../schemas/problem.js';
 import { MemoryCommentEventRepository } from '../repositories/memory/comment-event-repository.js';
+import { MemoryIdempotencyKeyRepository } from '../repositories/memory/idempotency-key-repository.js';
 
 type App = ReturnType<typeof buildApp>;
 
@@ -33,6 +34,7 @@ function testDeps(): AppDeps {
     users: new MemoryUserRepository(),
     revokedTokens: new MemoryRevokeTokenRepository(),
     commentEvents: new MemoryCommentEventRepository(),
+    idempotencyKeys: new MemoryIdempotencyKeyRepository(),
   };
   return {
     repos,

@@ -31,6 +31,7 @@ import { TokenService } from './services/token-service.js';
 import { createRequireAuth } from './plugins/auth.js';
 import { registerSecurity } from './plugins/security.js';
 import { registerHttpCache } from './plugins/http-cache.js';
+import { registerMetrics } from './plugins/metrics.js';
 
 export interface AppDeps {
   repos: Repos;
@@ -82,6 +83,7 @@ export function buildApp(
     env.NODE_ENV === 'production' || !env.BENCH_DISABLE_RATE_LIMIT;
   registerSecurity(app, env.NODE_ENV === 'production', globalRateLimit);
   registerHttpCache(app); // Cache-Control policy
+  registerMetrics(app);
   if (env.NODE_ENV !== 'production') {
     void app.register(swagger, {
       openapi: {

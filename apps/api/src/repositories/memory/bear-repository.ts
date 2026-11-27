@@ -13,4 +13,12 @@ export class MemoryBearRepository implements BearRepository {
   async findById(id: string): Promise<Bear | null> {
     return this.bears.find((b) => b.id === id) ?? null;
   }
+
+  async upsertMany(list: Bear[]): Promise<void> {
+    for (const bear of list) {
+      const i = this.bears.findIndex((b) => b.id === bear.id);
+      if (i === -1) this.bears.push(bear);
+      else this.bears[i] = bear;
+    }
+  }
 }

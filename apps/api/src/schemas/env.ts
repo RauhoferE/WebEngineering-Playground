@@ -33,6 +33,14 @@ export const Env = z.object({
   APP_VERSION: z.string().default('dev'),
   // Only for autocannon runs: turns the per-IP API limit off outside production
   BENCH_DISABLE_RATE_LIMIT: z.stringbool().default(false),
+  // Worker: must be longer than the slowest normal run, or a healthy job runs twice
+  JOB_VISIBILITY_TIMEOUT_SECONDS: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(300),
+  // Worker demo only: makes a job slow enough to kill the worker mid-job
+  WORKER_DEMO_DELAY_MS: z.coerce.number().int().min(0).default(0),
 });
 
 export type Env = z.infer<typeof Env>;

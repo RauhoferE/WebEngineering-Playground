@@ -134,3 +134,11 @@ export class RateLimitedError extends AppError {
     super(`Too many attempts. Try again in ${retryAfterSeconds} seconds.`);
   }
 }
+
+export class IdempotencyKeyReusedError extends AppError {
+  readonly status = 422;
+  readonly type = `${P}/idempotency-key-reused`;
+  readonly title = 'Idempotency-Key reused';
+  readonly detail =
+    'This Idempotency-Key was already used with a different request.';
+}

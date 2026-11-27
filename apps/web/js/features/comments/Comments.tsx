@@ -6,6 +6,7 @@ import { type CommentEntry } from './comment-models';
 import { CommentForm } from './CommentForm';
 import { CommentList } from './CommentList';
 import { createComment, deleteComment, fetchComments } from './comments.api';
+import { useCommentStream } from '../../common/useCommentStream';
 
 function isUnauthenticated(error: unknown): boolean {
   return error instanceof ApiError && error.problem.status === 401;
@@ -29,6 +30,7 @@ export function Comments({ bearId }: { bearId: string }): ReactElement {
   const [sessionExpired, setSessionExpired] = useState(false);
   // Announced after a delete, when the button that was pressed has disappeared
   const [notice, setNotice] = useState('');
+  useCommentStream(bearId, setComments);
   // Focus target after a delete, so keyboard users do not land at the top of the page
   const listHeadingRef = useRef<HTMLHeadingElement>(null);
 

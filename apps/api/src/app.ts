@@ -34,7 +34,7 @@ import { registerHttpCache } from './plugins/http-cache.js';
 import { registerMetrics } from './plugins/metrics.js';
 import { fetchBearsFromWikipedia } from './services/bear-source.js';
 import { CommentBus } from './events/comment-bus.js';
-import sse from '@fastify/sse';
+import { fastifySSE } from '@fastify/sse';
 
 export interface AppDeps {
   repos: Repos;
@@ -88,7 +88,7 @@ export function buildApp(
   registerSecurity(app, env.NODE_ENV === 'production', globalRateLimit);
   registerHttpCache(app); // Cache-Control policy
   registerMetrics(app);
-  void app.register(sse, { heartbeatInterval: 15_000 });
+  void app.register(fastifySSE, { heartbeatInterval: 15_000 });
   if (env.NODE_ENV !== 'production') {
     void app.register(swagger, {
       openapi: {

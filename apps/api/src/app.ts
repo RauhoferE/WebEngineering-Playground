@@ -165,7 +165,7 @@ export function buildApp(
   void app.register(etag); // ETag + 304 for every response
   void app.register(cookie);
   app.decorateRequest('user', null);
-  void app.register(bearRoutes, { bears });
+  void app.register(bearRoutes, { bears, requireAuth });
   void app.register(commentRoutes, {
     comments: new CommentService(
       deps.repos.comments,

@@ -5,7 +5,7 @@ export interface Actor {
   id: string;
   role: Role;
 }
-export type Action = 'comment:create' | 'comment:delete';
+export type Action = 'comment:create' | 'comment:delete' | 'bears:refresh';
 export type Verdict = 'allow' | 'unauthenticated' | 'forbidden';
 export interface CommentSubject {
   authorId: string | null;
@@ -21,6 +21,8 @@ export function can(
   switch (action) {
     case 'comment:create':
       return 'allow';
+    case 'bears:refresh':
+      return actor.role === 'moderator' ? 'allow' : 'forbidden';
     case 'comment:delete':
       if (actor.role === 'moderator') return 'allow'; // RBAC
       // Ownership; a missing subject or an authorless comment is never "yours" (deny by default)
@@ -28,8 +30,10 @@ export function can(
   }
 }
 
-export function enforce(verdict: Verdict): void {
+export function enforce(
+  verdict: Verdict,
+  message = 'You may not delete this comment.'
+): void {
   if (verdict === 'unauthenticated') throw new UnauthorizedError();
-  if (verdict === 'forbidden')
-    throw new ForbiddenError('You may not delete this comment.');
+  if (verdict === 'forbidden') throw new ForbiddenError(message);
 }

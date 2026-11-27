@@ -3,11 +3,13 @@ import { z } from 'zod';
 import { Bear, BearId, BearList } from '../schemas/bear.js';
 import type { BearService } from '../services/bear-service.js';
 import { problemResponse } from '../schemas/problem.js';
+import { currentUser, type RequireAuth } from '../plugins/auth.js';
+import { can, enforce } from '../auth/policy.js';
 
-export const bearRoutes: FastifyPluginAsyncZod<{ bears: BearService }> = async (
-  app,
-  { bears }
-) => {
+export const bearRoutes: FastifyPluginAsyncZod<{
+  bears: BearService;
+  requireAuth: RequireAuth;
+}> = async (app, { bears, requireAuth }) => {
   app.get(
     '/api/bears',
     {
@@ -37,5 +39,27 @@ export const bearRoutes: FastifyPluginAsyncZod<{ bears: BearService }> = async (
       },
     },
     async (req) => await bears.get(req.params.id)
+  );
+
+  app.post(
+    '/api/bears/refresh',
+    {
+      preHandler: requireAuth,
+      schema: {
+        response: {
+          200: z.object({ count: z.number().int() }),
+          401: Problem,
+          403: Problem,
+          ...problemResponse,
+        },
+      },
+    },
+    async (req) => {
+      enforce(
+        can(currentUser(req), 'bears:refresh'),
+        'Only moderators may refresh the bears.'
+      );
+      return { count: await bears.refresh() };
+    }
   );
 };

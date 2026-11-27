@@ -23,7 +23,8 @@
     "db:seed:comments": "npm run db:seed:comments -w apps/api",
     "db:seed:moderator": "npm run db:seed:moderator -w apps/api",
     "report:storm": "npm run report:storm -w apps/api",
-    "bench": "autocannon -c 50 -d 20 http://localhost:3000/api/bears"
+    "bench": "autocannon -c 50 -d 20 http://localhost:3000/api/bears",
+    "worker": "npm run worker -w apps/api"
   },
   "lint-staged": {
     "*.{ts,tsx,js}": [

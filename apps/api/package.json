@@ -16,7 +16,8 @@
     "test": "tsx --test \"src/**/*.test.ts\"",
     "db:seed:comments": "tsx --env-file-if-exists=../../.env src/scripts/seed-comments.ts",
     "db:seed:moderator": "tsx --env-file-if-exists=../../.env src/scripts/seed-moderator.ts",
-    "report:storm": "tsx src/scripts/report-storm.ts"
+    "report:storm": "tsx src/scripts/report-storm.ts",
+    "worker": "tsx --env-file-if-exists=../../.env src/worker.ts"
   },
   "keywords": [],
   "author": "",

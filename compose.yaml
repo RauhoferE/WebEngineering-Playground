@@ -53,5 +53,22 @@ services:
     depends_on:
       api:
         condition: service_healthy
+  worker:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    command: ['node', 'apps/api/dist/worker.js']
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-bears}:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@db:5432/${POSTGRES_DB:-bears}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env} # loadEnv() requires it; the worker doesn't use it
+      JOB_VISIBILITY_TIMEOUT_SECONDS: ${JOB_VISIBILITY_TIMEOUT_SECONDS:-300}
+      WORKER_DEMO_DELAY_MS: ${WORKER_DEMO_DELAY_MS:-0}
+    healthcheck:
+      disable: true # the image's HEALTHCHECK probes :3000, which the worker doesn't serve
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
 volumes:
   pgdata:

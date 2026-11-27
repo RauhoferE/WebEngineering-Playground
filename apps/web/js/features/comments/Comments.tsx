@@ -93,7 +93,11 @@ export function Comments({ bearId }: { bearId: string }): ReactElement {
       const created = await createComment(bearId, comment, pending.current.key);
       pending.current = null; // done: the next comment is a new intent
       // Newest first, so a new comment goes on top
-      setComments((previous) => [created, ...previous]);
+      setComments((previous) =>
+        previous.some((c) => c.id === created.id)
+          ? previous
+          : [created, ...previous]
+      );
     } catch (error: unknown) {
       if (isUnauthenticated(error)) endSession();
       throw error; // CommentForm shows the message
